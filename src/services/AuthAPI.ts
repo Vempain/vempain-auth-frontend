@@ -4,7 +4,7 @@ import type {JwtResponse} from "../models/Responses";
 
 export class AuthAPI {
     userKey: string = 'vempainUser';
-    member: string = "login";
+    member: string = "/login";
 
     protected axiosInstance: AxiosInstance;
 
