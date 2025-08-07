@@ -1,7 +1,6 @@
 # Ignore Gradle build output directory
 .idea/
 
-yarn.lock
 package-lock.json
 node_modules
 build

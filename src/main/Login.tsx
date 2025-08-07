@@ -49,49 +49,51 @@ function Login() {
             <Alert type={"error"}
                    message={loginResults.message}
                    showIcon
-                   action={<Button type={"primary"} onClick={() => clearStateOnBackButton()}>{"Return to front page"}</Button>}
+                   action={<Button type={"primary"}
+                                   onClick={() => clearStateOnBackButton()}>{"Return to front page"}</Button>}
             />
         </div>);
     }
 
     return (
+        <div className={"DarkDiv"}>
             <Spin tip={"Loading"} spinning={loading}>
                 <Space
-                        direction={"vertical"}
-                        style={{width: "100%", margin: 30}}
-                        align={"center"}
-                        size={"large"}
+                    direction={"vertical"}
+                    style={{width: "100%", margin: 30}}
+                    align={"center"}
+                    size={"large"}
                 >
                     <Form
-                            name="basic"
-                            labelCol={{span: 8}}
-                            wrapperCol={{span: 16}}
-                            style={{maxWidth: 600, margin: "auto"}}
-                            initialValues={{remember: true}}
-                            onFinish={onFinish}
-                            onFinishFailed={onFinishFailed}
-                            autoComplete="off"
+                        name="basic"
+                        labelCol={{span: 8}}
+                        wrapperCol={{span: 16}}
+                        style={{maxWidth: 600, margin: "auto"}}
+                        initialValues={{remember: true}}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
+                        autoComplete="off"
                     >
                         <Form.Item<FieldType>
-                                label="Username"
-                                name="username"
-                                rules={[{required: true, message: "Please input your username!"}]}
+                            label="Username"
+                            name="username"
+                            rules={[{required: true, message: "Please input your username!"}]}
                         >
                             <Input autoFocus/>
                         </Form.Item>
 
                         <Form.Item<FieldType>
-                                label="Password"
-                                name="password"
-                                rules={[{required: true, message: "Please input your password!"}]}
+                            label="Password"
+                            name="password"
+                            rules={[{required: true, message: "Please input your password!"}]}
                         >
                             <Input.Password/>
                         </Form.Item>
 
                         <Form.Item<FieldType>
-                                name="remember"
-                                valuePropName="checked"
-                                wrapperCol={{offset: 8, span: 16}}
+                            name="remember"
+                            valuePropName="checked"
+                            wrapperCol={{offset: 8, span: 16}}
                         >
                             <Checkbox>Remember me</Checkbox>
                         </Form.Item>
@@ -104,7 +106,8 @@ function Login() {
                     </Form>
                 </Space>
             </Spin>
+        </div>
     );
 }
 
-export { Login };
+export {Login};
