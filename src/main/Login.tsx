@@ -56,57 +56,57 @@ function Login() {
     }
 
     return (
-        <div className={"DarkDiv"}>
-            <Spin tip={"Loading"} spinning={loading}>
-                <Space
-                    direction={"vertical"}
-                    style={{width: "100%", margin: 30}}
-                    align={"center"}
-                    size={"large"}
-                >
-                    <Form
-                        name="basic"
-                        labelCol={{span: 8}}
-                        wrapperCol={{span: 16}}
-                        style={{maxWidth: 600, margin: "auto"}}
-                        initialValues={{remember: true}}
-                        onFinish={onFinish}
-                        onFinishFailed={onFinishFailed}
-                        autoComplete="off"
+            <div className={"DarkDiv"}>
+                <Spin tip={"Loading"} spinning={loading}>
+                    <Space
+                            direction={"vertical"}
+                            style={{width: "100%", margin: 30}}
+                            align={"center"}
+                            size={"large"}
                     >
-                        <Form.Item<FieldType>
-                            label="Username"
-                            name="username"
-                            rules={[{required: true, message: "Please input your username!"}]}
+                        <Form
+                                name="basic"
+                                labelCol={{span: 8}}
+                                wrapperCol={{span: 16}}
+                                style={{maxWidth: 600, margin: "auto"}}
+                                initialValues={{remember: true}}
+                                onFinish={onFinish}
+                                onFinishFailed={onFinishFailed}
+                                autoComplete="off"
                         >
-                            <Input autoFocus/>
-                        </Form.Item>
+                            <Form.Item<FieldType>
+                                    label="Username"
+                                    name="username"
+                                    rules={[{required: true, message: "Please input your username!"}]}
+                            >
+                                <Input autoFocus/>
+                            </Form.Item>
 
-                        <Form.Item<FieldType>
-                            label="Password"
-                            name="password"
-                            rules={[{required: true, message: "Please input your password!"}]}
-                        >
-                            <Input.Password/>
-                        </Form.Item>
+                            <Form.Item<FieldType>
+                                    label="Password"
+                                    name="password"
+                                    rules={[{required: true, message: "Please input your password!"}]}
+                            >
+                                <Input.Password/>
+                            </Form.Item>
 
-                        <Form.Item<FieldType>
-                            name="remember"
-                            valuePropName="checked"
-                            wrapperCol={{offset: 8, span: 16}}
-                        >
-                            <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
+                            <Form.Item<FieldType>
+                                    name="remember"
+                                    valuePropName="checked"
+                                    wrapperCol={{offset: 8, span: 16}}
+                            >
+                                <Checkbox>Remember me</Checkbox>
+                            </Form.Item>
 
-                        <Form.Item wrapperCol={{offset: 8, span: 16}}>
-                            <Button type={"primary"} htmlType={"submit"}>
-                                Submit
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                </Space>
-            </Spin>
-        </div>
+                            <Form.Item wrapperCol={{offset: 8, span: 16}}>
+                                <Button type={"primary"} htmlType={"submit"}>
+                                    Submit
+                                </Button>
+                            </Form.Item>
+                        </Form>
+                    </Space>
+                </Spin>
+            </div>
     );
 }
 
