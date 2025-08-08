@@ -65,7 +65,7 @@ jobs:
         env:
           baseVersion: ${{ steps.basemain.outputs.baseVersion }}
 
-      - name: Set version from tag
+      - name: Set new package version
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
         run: |
           echo "Setting version from tag: ${newVersion}"
