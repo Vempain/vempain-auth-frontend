@@ -66,9 +66,9 @@ jobs:
           baseVersion: ${{ steps.basemain.outputs.baseVersion }}
 
       - name: Set version from tag
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
         run: |
-          echio "Setting version from tag: ${newVersion}"
+          echo "Setting version from tag: ${newVersion}"
           yarn version --new-version ${newVersion} --no-git-tag-version
         env:
           newVersion: ${{ steps.newVer.outputs.newVersion }}
