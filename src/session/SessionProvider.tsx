@@ -1,7 +1,7 @@
-import {createContext, useContext, useEffect, useState} from "react";
 import type {ReactNode} from "react";
+import {createContext, useContext, useEffect, useState} from "react";
 import type {LoginStatus, LoginVO} from "../models";
-import  {ActionResultEnum} from "../models";
+import {ActionResultEnum} from "../models";
 import type {LoginRequest} from "../models/Requests";
 import {AuthAPI} from "../services";
 
@@ -17,6 +17,7 @@ interface SessionProviderProps {
     baseURL: string;
     children: ReactNode;
 }
+
 // Create a context to hold the session information
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
@@ -38,20 +39,20 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
     // Function to handle login
     const loginUser = (loginRequest: LoginRequest): Promise<LoginStatus> => {
         return authAPI.login(loginRequest)
-            .then((jwtResponse) => {
-                localStorage.setItem(userKey, JSON.stringify(jwtResponse));
-                setUser(jwtResponse);
-                return {
-                    status: ActionResultEnum.SUCCESS,
-                    message: "Login successful"
-                };
-            })
-            .catch((error) => {
-                return {
-                    status: ActionResultEnum.FAILURE,
-                    message: "Failed to log on user: " + error.message
-                };
-            });
+                .then((jwtResponse) => {
+                    localStorage.setItem(userKey, JSON.stringify(jwtResponse));
+                    setUser(jwtResponse);
+                    return {
+                        status: ActionResultEnum.SUCCESS,
+                        message: "Login successful"
+                    };
+                })
+                .catch((error) => {
+                    return {
+                        status: ActionResultEnum.FAILURE,
+                        message: "Failed to log on user: " + error.message
+                    };
+                });
     };
 
     // Function to handle logout
@@ -68,9 +69,9 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
     };
 
     return (
-        <SessionContext.Provider value={contextValue} key={"MainContext"}>
-            {children}
-        </SessionContext.Provider>
+            <SessionContext.Provider value={contextValue} key={"MainContext"}>
+                {children}
+            </SessionContext.Provider>
     );
 }
 

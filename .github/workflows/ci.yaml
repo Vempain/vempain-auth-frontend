@@ -81,3 +81,15 @@ jobs:
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TAG_CREATION_TOKEN }}
+
+      - name: Create tag
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TAG_CREATION_TOKEN }}
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{ steps.newVer.outputs.newVersion }}',
+              sha: context.sha
+            })
