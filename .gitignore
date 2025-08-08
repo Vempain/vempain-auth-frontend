@@ -9,5 +9,6 @@ coverage
 
 .env.local
 .env.stage
+.npmrc
 
 src/buildInfo.json

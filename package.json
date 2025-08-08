@@ -1,8 +1,8 @@
 {
-  "name": "vempain-shared-auth",
+  "name": "@vempain/vempain-auth-frontend",
   "type": "module",
   "version": "0.9.0",
-  "description": "Vempain shared authorization and session handling",
+  "description": "Vempain authorization and session handling for the frontend",
   "author": "Paul-Erik Törrönen",
   "homepage": "https://vempain.poltsi.fi",
   "license": "GPL-2.0",
@@ -49,5 +49,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Vempain/vempain-auth-frontend.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   }
 }
