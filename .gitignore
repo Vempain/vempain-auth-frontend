@@ -4,9 +4,11 @@
 package-lock.json
 node_modules
 build
+dist
 coverage
 
 .env.local
 .env.stage
+.npmrc
 
 src/buildInfo.json
