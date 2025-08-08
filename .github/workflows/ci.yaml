@@ -33,7 +33,7 @@ jobs:
       - name: Clean and install dependencies
         run: |
           yarn cache clean
-          yarn install --force
+          yarn install
 
       - name: Build
         run: yarn build:production
