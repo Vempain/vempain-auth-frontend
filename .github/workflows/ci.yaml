@@ -38,16 +38,39 @@ jobs:
       - name: Build
         run: yarn build:production
 
-      # Uncomment when you add tests
-      # - name: Test
-      #   run: yarn test
+      - name: Get main and base version
+        id: basemain
+        shell: bash
+        run: |
+          baseVersion=$(cat VERSION)
+          mainVersion=$(echo ${baseVersion} | cut -d '.' -f 1)
+          echo "baseVersion=${baseVersion}" >> $GITHUB_OUTPUT
+          echo "mainVersion=${mainVersion}" >> $GITHUB_OUTPUT
+
+      - name: Generate new version
+        id: newVer
+        shell: bash
+        run: |
+          git fetch --tags origin
+          currentVersion=$(git tag --list --sort=-version:refname "${baseVersion}.*" | head -n 1 || "${baseVersion}.0")
+
+          if [ -z "${currentVersion}" ]; then
+            newVersion="${baseVersion}.0"
+          else
+            runningNumber=$(echo ${currentVersion} | cut -f 3 -d '.')
+            newVersion="${baseVersion}.$((${runningNumber} + 1))"
+          fi
+          echo "The generated new version is: ${newVersion}"
+          echo "newVersion=${newVersion}" >> $GITHUB_OUTPUT
+        env:
+          baseVersion: ${{ steps.basemain.outputs.baseVersion }}
 
       - name: Set version from tag
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          TAG=${GITHUB_REF#refs/tags/v}
-          echo "RELEASE_VERSION=$TAG" >> $GITHUB_ENV
-          yarn version --new-version $TAG --no-git-tag-version
+          yarn version --new-version ${newVersion} --no-git-tag-version
+        env:
+          newVersion: ${{ steps.newVer.outputs.newVersion }}
 
       - name: Publish to GitHub Packages
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
