@@ -9,3 +9,6 @@ export type {SubmitResult} from './SubmitResult';
 export {ActionResult} from './ActionResult';
 export {ActionResultEnum} from './ActionResultEnum';
 export {PrivilegeEnum} from './PrivilegeEnum';
+// Sub-Models
+export * from './Requests';
+export * from './Responses';
