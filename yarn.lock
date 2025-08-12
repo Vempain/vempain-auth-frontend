@@ -259,7 +259,7 @@ __metadata:
   dependencies:
     "@types/react": "npm:^19.1.9"
     "@types/react-dom": "npm:^19.0.4"
-    antd: "npm:^5.26.6"
+    antd: "npm:^5.27.0"
     axios: "npm:^1.7.9"
     dayjs: "npm:^1.11.13"
     env-cmd: "npm:^10.1.0"
@@ -276,9 +276,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"antd@npm:^5.26.6":
-  version: 5.26.7
-  resolution: "antd@npm:5.26.7"
+"antd@npm:^5.27.0":
+  version: 5.27.0
+  resolution: "antd@npm:5.27.0"
   dependencies:
     "@ant-design/colors": "npm:^7.2.1"
     "@ant-design/cssinjs": "npm:^1.23.0"
@@ -320,8 +320,8 @@ __metadata:
     rc-steps: "npm:~6.0.1"
     rc-switch: "npm:~4.1.0"
     rc-table: "npm:~7.51.1"
-    rc-tabs: "npm:~15.6.1"
-    rc-textarea: "npm:~1.10.1"
+    rc-tabs: "npm:~15.7.0"
+    rc-textarea: "npm:~1.10.2"
     rc-tooltip: "npm:~6.4.0"
     rc-tree: "npm:~5.13.1"
     rc-tree-select: "npm:~5.27.0"
@@ -332,7 +332,7 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 10c0/2ff4469091790986faf7ad76854c3ea9ff231df2c2ba1eed93caf93986401193a8265d3b1a4074be79a9a9705a8c823508cfbbd370c5c8db04f7dcc90895ccf5
+  checksum: 10c0/c5eee01a8c69f78c8d8cf673b94891daab2c9e5910bf29c61c3f188be5c55891ea1f58708b9681efe2da7f87dc5e32bb0f5f0baaa0a2c0f8f924c46fbf7ea46c
   languageName: node
   linkType: hard
 
@@ -1165,9 +1165,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-tabs@npm:~15.6.1":
-  version: 15.6.1
-  resolution: "rc-tabs@npm:15.6.1"
+"rc-tabs@npm:~15.7.0":
+  version: 15.7.0
+  resolution: "rc-tabs@npm:15.7.0"
   dependencies:
     "@babel/runtime": "npm:^7.11.2"
     classnames: "npm:2.x"
@@ -1179,11 +1179,11 @@ __metadata:
   peerDependencies:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
-  checksum: 10c0/b982582902684eae5ec1783af4de1d31bd8c8fc7419dec3abd883abfa51d7a270db01a73bc579341fc84b0c8a92fc2cbd0e8ed272ce31b4ea2ac5979eaf5215c
+  checksum: 10c0/472561f2ec611e9f2a396ba9fec6b83138621651aa2e9fb5a1c68b4da8cb6cab01c23ca71b3940876a595f30c2b8324b8899f93486862271be8eb16a95433764
   languageName: node
   linkType: hard
 
-"rc-textarea@npm:~1.10.0, rc-textarea@npm:~1.10.1":
+"rc-textarea@npm:~1.10.0, rc-textarea@npm:~1.10.2":
   version: 1.10.2
   resolution: "rc-textarea@npm:1.10.2"
   dependencies:
