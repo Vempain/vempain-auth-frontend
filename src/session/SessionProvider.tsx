@@ -1,13 +1,15 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useState} from "react";
-import type {LoginStatus, LoginVO} from "../models";
+import type {LoginRequest, LoginStatus, LoginVO} from "../models";
 import {ActionResultEnum} from "../models";
-import type {LoginRequest} from "../models/Requests";
 import {AuthAPI} from "../services";
 
 // Define the type for the session context
 interface SessionContextType {
     userSession: LoginVO | null;
+    sessionLanguage: string;
+    getSessionLanguage: () => string;
+    setSessionLanguage: (language: string) => void;
     loginUser: (loginRequest: LoginRequest) => Promise<LoginStatus>;
     logoutUser: () => void;
 }
@@ -24,7 +26,10 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 // Create a SessionProvider component
 export function SessionProvider({baseURL, children}: SessionProviderProps) {
     const [user, setUser] = useState<LoginVO | null>(null);
+    const [language, setLanguage] = useState<string>("en");
     const userKey: string = "vempainUser";
+    const languageKey: string = "language";
+
     const authAPI = new AuthAPI(baseURL);
 
     // Check if user data exists in local storage on initial load
@@ -34,7 +39,15 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
         if (userData) {
             setUser(JSON.parse(userData));
         }
-    }, [userKey]);
+
+        const languageData = localStorage.getItem(languageKey);
+        if (languageData) {
+            setLanguage(languageData);
+        } else {
+            setLanguage("en");
+        }
+
+    }, [userKey, languageKey]);
 
     // Function to handle login
     const loginUser = (loginRequest: LoginRequest): Promise<LoginStatus> => {
@@ -62,8 +75,20 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
         authAPI.logout();
     };
 
+    const setSessionLanguage = (language: string) => {
+        setLanguage(language);
+        localStorage.setItem(languageKey, language);
+    };
+
+    const getSessionLanguage = () => {
+        return language;
+    };
+
     const contextValue: SessionContextType = {
         userSession: user,
+        sessionLanguage: language,
+        getSessionLanguage,
+        setSessionLanguage,
         loginUser,
         logoutUser
     };
