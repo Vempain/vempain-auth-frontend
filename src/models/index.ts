@@ -5,10 +5,11 @@ export type {LoginStatus} from './LoginStatus';
 export type {Pageable} from './Pageable';
 export type {Sort} from './Sort';
 export type {SubmitResult} from './SubmitResult';
-// Enums
+// Enums and Constants
 export {ActionResult} from './ActionResult';
 export {ActionResultEnum} from './ActionResultEnum';
 export {PrivilegeEnum} from './PrivilegeEnum';
+export * from './VempainConstants';
 // Sub-Models
 export * from './Requests';
 export * from './Responses';
