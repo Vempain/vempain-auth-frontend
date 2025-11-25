@@ -11,4 +11,5 @@ export interface JwtResponse {
     units: UnitVO[];
     token: string;
     type: string;
+    expires_at: Date;
 }

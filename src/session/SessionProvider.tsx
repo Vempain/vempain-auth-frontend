@@ -1,7 +1,6 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useState} from "react";
-import type {LoginRequest, LoginStatus, LoginVO} from "../models";
-import {ActionResultEnum} from "../models";
+import {ActionResultEnum, type LoginRequest, type LoginStatus, type LoginVO, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {AuthAPI} from "../services";
 
 // Define the type for the session context
@@ -27,14 +26,13 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 export function SessionProvider({baseURL, children}: SessionProviderProps) {
     const [user, setUser] = useState<LoginVO | null>(null);
     const [language, setLanguage] = useState<string>("en");
-    const userKey: string = "vempainUser";
     const languageKey: string = "language";
 
     const authAPI = new AuthAPI(baseURL);
 
     // Check if user data exists in local storage on initial load
     useEffect(() => {
-        const userData = localStorage.getItem(userKey);
+        const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
 
         if (userData) {
             setUser(JSON.parse(userData));
@@ -47,13 +45,13 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
             setLanguage("en");
         }
 
-    }, [userKey, languageKey]);
+    }, [VEMPAIN_LOCAL_STORAGE_KEY, languageKey]);
 
     // Function to handle login
     const loginUser = (loginRequest: LoginRequest): Promise<LoginStatus> => {
         return authAPI.login(loginRequest)
                 .then((jwtResponse) => {
-                    localStorage.setItem(userKey, JSON.stringify(jwtResponse));
+                    localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
                     setUser(jwtResponse);
                     return {
                         status: ActionResultEnum.SUCCESS,

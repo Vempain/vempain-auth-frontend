@@ -1,9 +1,7 @@
 import Axios, {type AxiosInstance} from "axios";
-import type {LoginRequest} from "../models/Requests";
-import type {JwtResponse} from "../models/Responses";
+import {type JwtResponse, type LoginRequest, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 
 export class AuthAPI {
-    userKey: string = 'vempainUser';
     member: string = "/login";
 
     protected axiosInstance: AxiosInstance;
@@ -20,7 +18,7 @@ export class AuthAPI {
         if (response.status === 200 && response.data.id > 0) {
             const session: JwtResponse = response.data;
 
-            localStorage.setItem(this.userKey, JSON.stringify(session));
+            localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(session));
             console.log('After login post, set user session in local storage:', session);
         } else {
             if (response.status !== 200) {
@@ -35,7 +33,7 @@ export class AuthAPI {
 
     logout() {
         console.log('Logout so clearing out local storage');
-        localStorage.removeItem(this.userKey);
+        localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
         console.info("Removed user key from local storage");
     }
 }

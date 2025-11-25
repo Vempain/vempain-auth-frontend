@@ -1,5 +1,5 @@
 import Axios, {type AxiosInstance} from "axios";
-import type {JwtResponse, PageableResponse} from "../models/Responses";
+import {type JwtResponse, type PageableResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 
 export abstract class AbstractAPI<REQUEST, RESPONSE> {
     protected axiosInstance: AxiosInstance;
@@ -66,7 +66,7 @@ export abstract class AbstractAPI<REQUEST, RESPONSE> {
      * @protected
      */
     protected setAuthorizationHeader(): void {
-        const session: JwtResponse = JSON.parse(localStorage.getItem("vempainUser") || "{}");
+        const session: JwtResponse = JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) || "{}");
 
         if (session && session.token) {
             this.axiosInstance.defaults.headers.common['Authorization'] = 'Bearer ' + session.token;
