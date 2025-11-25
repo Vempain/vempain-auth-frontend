@@ -95,3 +95,28 @@ jobs:
               ref: 'refs/tags/${{ steps.newVer.outputs.newVersion }}',
               sha: context.sha
             })
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
+          script: |
+            const tag = '${{ steps.newVer.outputs.newVersion }}';
+            const resp = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tag,
+              name: `Release ${tag}`,
+              body: `Automated release for ${tag}
+
+              Docker tags pushed:
+              - latest
+              - ${{ steps.basemain.outputs.mainVersion }}
+              - ${{ steps.basemain.outputs.baseVersion }}
+              - ${tag}
+              `,
+              draft: false,
+              prerelease: false,
+              generate_release_notes: true
+            });
+            core.info(`Release created: ${resp.data.html_url}`);
