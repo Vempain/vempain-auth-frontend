@@ -4,7 +4,7 @@ import {type JwtResponse, type PageableResponse, VEMPAIN_LOCAL_STORAGE_KEY} from
 export abstract class AbstractAPI<REQUEST, RESPONSE> {
     protected axiosInstance: AxiosInstance;
 
-    constructor(baseURL: string, member: string) {
+    protected constructor(baseURL: string, member: string) {
         this.axiosInstance = Axios.create({
             baseURL: baseURL + member
         });

@@ -2,7 +2,7 @@ import {Alert, Button, Checkbox, Form, Input, Space, Spin} from "antd";
 import {useState} from "react";
 import {useSession} from "../session";
 import {type NavigateFunction, useNavigate} from "react-router-dom";
-import type {LoginRequest} from "../models/Requests";
+import type {LoginRequest} from "../models";
 import {ActionResult, ActionResultEnum, type LoginStatus, type SubmitResult} from "../models";
 
 function Login() {
@@ -47,7 +47,7 @@ function Login() {
     if (loginResults.status === ActionResult.FAIL) {
         return (<div>
             <Alert type={"error"}
-                   message={loginResults.message}
+                   title={loginResults.message}
                    showIcon
                    action={<Button type={"primary"}
                                    onClick={() => clearStateOnBackButton()}>{"Return to front page"}</Button>}
@@ -59,7 +59,7 @@ function Login() {
             <div className={"DarkDiv"}>
                 <Spin tip={"Loading"} spinning={loading}>
                     <Space
-                            direction={"vertical"}
+                            vertical={true}
                             style={{width: "100%", margin: 30}}
                             align={"center"}
                             size={"large"}
