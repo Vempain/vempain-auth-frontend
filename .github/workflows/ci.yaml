@@ -66,7 +66,7 @@ jobs:
           baseVersion: ${{ steps.basemain.outputs.baseVersion }}
 
       - name: Set new package version
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main')
         run: |
           echo "Setting version from tag: ${newVersion}"
           yarn version --immediate ${newVersion}
@@ -74,7 +74,7 @@ jobs:
           newVersion: ${{ steps.newVer.outputs.newVersion }}
 
       - name: Publish to GitHub Packages
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main')
         run: |
           echo "registry=https://npm.pkg.github.com" > .npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.VEMPAIN_ACTION_TOKEN }}" >> .npmrc
@@ -84,7 +84,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
 
       - name: Create tag
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main')
         uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
