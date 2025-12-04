@@ -1,6 +1,7 @@
 import type {AclVO} from "./Responses";
 
-export interface AbstractPermissionVO {
+export interface AbstractResponse {
+    id: number;
     acls: AclVO[];
     created: Date;
     creator: number;

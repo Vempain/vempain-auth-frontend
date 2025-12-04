@@ -1,9 +1,8 @@
 // This mirrors the fi.poltsi.vempain.admin.api.response.UnitResponse
 
-import type {AbstractPermissionVO} from "../AbstractPermissionVO";
+import type {AbstractResponse} from "../AbstractResponse.ts";
 
-export interface UnitVO extends AbstractPermissionVO {
-    id: number | null;
+export interface UnitVO extends AbstractResponse {
     name: string;
     description: string;
 }
