@@ -1,60 +1,60 @@
 {
-  "name": "@vempain/vempain-auth-frontend",
-  "type": "module",
-  "version": "0.9.0",
-  "description": "Vempain authorization and session handling for the frontend",
-  "author": "Paul-Erik Törrönen",
-  "homepage": "https://vempain.poltsi.fi",
-  "license": "GPL-2.0",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+  "name" : "@vempain/vempain-auth-frontend",
+  "type" : "module",
+  "version" : "0.9.0",
+  "description" : "Vempain authorization and session handling for the frontend",
+  "author" : "Paul-Erik Törrönen",
+  "homepage" : "https://vempain.poltsi.fi",
+  "license" : "GPL-2.0",
+  "main" : "./dist/index.js",
+  "module" : "./dist/index.js",
+  "types" : "./dist/index.d.ts",
+  "exports" : {
+    "." : {
+      "import" : "./dist/index.js",
+      "types" : "./dist/index.d.ts"
     }
   },
-  "files": [
+  "files" : [
     "dist"
   ],
-  "packageManager": "yarn@4.9.2",
-  "scripts": {
-    "prebuild": "node generateBuildInfo.js",
-    "build": "tsc -p tsconfig.build.json",
-    "build:stage": "yarn prebuild && tsc -p tsconfig.build.json",
+  "packageManager" : "yarn@4.12.0",
+  "scripts" : {
+    "prebuild" : "node generateBuildInfo.js",
+    "build" : "tsc -p tsconfig.build.json",
+    "build:stage" : "yarn prebuild && tsc -p tsconfig.build.json",
     "build:production" : "yarn prebuild && tsc -p tsconfig.build.json",
     "test" : "jest",
     "test:watch" : "jest --watch",
     "test:coverage" : "jest --coverage ."
   },
-  "dependencies": {
+  "dependencies" : {
     "antd" : "^6.0.0",
-    "dayjs": "^1.11.19",
-    "env-cmd": "^11.0.0",
-    "jsonwebtoken": "^9.0.0",
-    "react-router": "^7.9.6",
-    "react-router-dom": "^7.9.6",
-    "typescript": "^5.9.3"
+    "dayjs" : "^1.11.19",
+    "env-cmd" : "^11.0.0",
+    "jsonwebtoken" : "^9.0.0",
+    "react-router" : "^7.9.6",
+    "react-router-dom" : "^7.9.6",
+    "typescript" : "^5.9.3"
   },
-  "peerDependencies": {
-    "axios": "^1.13.2",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+  "peerDependencies" : {
+    "axios" : "^1.13.2",
+    "react" : "^19.2.0",
+    "react-dom" : "^19.2.0"
   },
-  "devDependencies": {
+  "devDependencies" : {
     "@eslint/js" : "^9.39.1",
     "@testing-library/jest-dom" : "^6.9.1",
     "@types/jest" : "^30.0.0",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "axios": "^1.13.2",
+    "@types/react" : "^19.2.7",
+    "@types/react-dom" : "^19.2.3",
+    "axios" : "^1.13.2",
     "eslint" : "^9.39.1",
     "eslint-plugin-react-hooks" : "^7.0.1",
     "eslint-plugin-react-refresh" : "^0.4.24",
     "jest" : "^30.2.0",
     "jest-environment-jsdom" : "^30.2.0",
-    "react": "^19.2.0",
+    "react" : "^19.2.0",
     "react-dom" : "^19.2.0",
     "ts-jest" : "^29.4.6",
     "typescript-eslint" : "^8.48.0"
@@ -65,11 +65,11 @@
       "react-app/jest"
     ]
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Vempain/vempain-auth-frontend.git"
+  "repository" : {
+    "type" : "git",
+    "url" : "git+https://github.com/Vempain/vempain-auth-frontend.git"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+  "publishConfig" : {
+    "registry" : "https://npm.pkg.github.com"
   }
 }
