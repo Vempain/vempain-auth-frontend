@@ -11,6 +11,7 @@ interface SessionContextType {
     setSessionLanguage: (language: string) => void;
     loginUser: (loginRequest: LoginRequest) => Promise<LoginStatus>;
     logoutUser: () => void;
+    refreshUserSession: (loginVO: LoginVO) => void;
 }
 
 // Add props type for SessionProvider
@@ -82,13 +83,19 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
         return language;
     };
 
+    function refreshUserSession(loginVO: LoginVO): void {
+        localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(loginVO));
+        setUser(loginVO);
+    };
+
     const contextValue: SessionContextType = {
         userSession: user,
         sessionLanguage: language,
         getSessionLanguage,
         setSessionLanguage,
         loginUser,
-        logoutUser
+        logoutUser,
+        refreshUserSession
     };
 
     return (
