@@ -37,8 +37,11 @@ jobs:
           yarn cache clean
           yarn install
 
-      - name: Build
+      - name: Run tests
         run: yarn test test:coverage
+
+      - name: Run coverage
+        run: yarn test:coverage
 
   publish:
     name: Package and publish to GithHub NPM
