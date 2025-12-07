@@ -38,7 +38,7 @@ jobs:
           yarn install
 
       - name: Run tests
-        run: yarn test test:coverage
+        run: yarn test
 
       - name: Run coverage
         run: yarn test:coverage
