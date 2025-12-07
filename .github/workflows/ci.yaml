@@ -45,7 +45,7 @@ jobs:
         run: yarn test:coverage
 
   publish:
-    name: Package and publish to GithHub NPM
+    name: Package and publish to GitHub NPM
     runs-on: ubuntu-latest
     needs: test
     permissions:
@@ -68,6 +68,14 @@ jobs:
           path: .yarn/cache
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Clean and install dependencies
+        run: |
+          yarn cache clean
+          yarn install
+
+      - name: Build
+        run: yarn build:production
 
       - name: Get main and base version
         id: basemain
@@ -141,7 +149,7 @@ jobs:
               name: `Release ${tag}`,
               body: `Automated release for ${tag}
 
-              Docker tags pushed:
+              NPM tags pushed:
               - latest
               - ${{ steps.basemain.outputs.mainVersion }}
               - ${{ steps.basemain.outputs.baseVersion }}
