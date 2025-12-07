@@ -19,7 +19,6 @@ export class AuthAPI {
             const session: JwtResponse = response.data;
 
             localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(session));
-            console.log('After login post, set user session in local storage:', session);
         } else {
             if (response.status !== 200) {
                 console.error("The response status was " + response.status + ": " + JSON.stringify(response));
