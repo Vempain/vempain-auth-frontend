@@ -1,6 +1,6 @@
 // This mirrors the fi.poltsi.vempain.admin.api.response.UserResponse
 
-import type {AbstractResponse} from "../AbstractResponse.ts";
+import type {AbstractResponse} from "./AbstractResponse.ts";
 
 export interface UserVO extends AbstractResponse {
     private_user: boolean;

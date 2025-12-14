@@ -1,4 +1,3 @@
-export type {AbstractResponse} from './AbstractResponse.ts';
 export type {BuildInfo} from './BuildInfo';
 export type {LoginVO} from './LoginVO';
 export type {LoginStatus} from './LoginStatus';
