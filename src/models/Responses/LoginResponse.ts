@@ -1,15 +1,14 @@
 // This is used to log on the user to the application
 
 import type {UnitVO} from "./UnitVO";
+import type {Dayjs} from "dayjs";
 
-export interface JwtResponse {
+export interface LoginResponse {
+    token: string;
     id: number;
     login: string;
     nickname: string;
     email: string;
-    password: string;
     units: UnitVO[];
-    token: string;
-    type: string;
-    expires_at: Date;
+    expires_at: Dayjs;
 }

@@ -1,5 +1,5 @@
 import Axios, {type AxiosInstance} from "axios";
-import {type JwtResponse, type LoginRequest, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {type LoginRequest, type LoginResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 
 export class AuthAPI {
     member: string = "/login";
@@ -12,11 +12,11 @@ export class AuthAPI {
         });
     }
 
-    async login(user: LoginRequest): Promise<JwtResponse> {
-        const response = await this.axiosInstance.post<JwtResponse>("", user);
+    async login(user: LoginRequest): Promise<LoginResponse> {
+        const response = await this.axiosInstance.post<LoginResponse>("", user);
 
         if (response.status === 200 && response.data.id > 0) {
-            const session: JwtResponse = response.data;
+            const session: LoginResponse = response.data;
 
             localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(session));
         } else {

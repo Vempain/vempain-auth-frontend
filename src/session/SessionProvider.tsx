@@ -1,17 +1,17 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useState} from "react";
-import {ActionResultEnum, type LoginRequest, type LoginStatus, type LoginVO, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {AuthAPI} from "../services";
 
 // Define the type for the session context
 interface SessionContextType {
-    userSession: LoginVO | null;
+    userSession: LoginResponse | null;
     sessionLanguage: string;
     getSessionLanguage: () => string;
     setSessionLanguage: (language: string) => void;
     loginUser: (loginRequest: LoginRequest) => Promise<LoginStatus>;
     logoutUser: () => void;
-    refreshUserSession: (loginVO: LoginVO) => void;
+    refreshUserSession: (loginVO: LoginResponse) => void;
 }
 
 // Add props type for SessionProvider
@@ -25,7 +25,7 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 // Create a SessionProvider component
 export function SessionProvider({baseURL, children}: SessionProviderProps) {
-    const [user, setUser] = useState<LoginVO | null>(null);
+    const [user, setUser] = useState<LoginResponse | null>(null);
     const [language, setLanguage] = useState<string>("en");
     const languageKey: string = "language";
 
@@ -83,7 +83,7 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
         return language;
     };
 
-    function refreshUserSession(loginVO: LoginVO): void {
+    function refreshUserSession(loginVO: LoginResponse): void {
         localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(loginVO));
         setUser(loginVO);
     };
