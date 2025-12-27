@@ -7,7 +7,6 @@ function Logout() {
     const navigate: NavigateFunction = useNavigate();
 
     useEffect(() => {
-        console.log("Logout useEffect");
         logoutUser();
         navigate("/");
     }, [logoutUser, navigate]);
