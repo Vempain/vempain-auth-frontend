@@ -31,8 +31,6 @@ export class AuthAPI {
     }
 
     logout() {
-        console.log('Logout so clearing out local storage');
         localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
-        console.info("Removed user key from local storage");
     }
 }

@@ -70,7 +70,6 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
     // Function to handle logout
     const logoutUser = () => {
         setUser(null);
-        console.log("Logging out so set user data to null and calling authService.logout()");
         authAPI.logout();
     };
 
