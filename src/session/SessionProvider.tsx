@@ -1,7 +1,7 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
-import {AuthAPI} from "../services";
+import {AuthAPI, setOnUnauthorizedCallback, resetUnauthorizedHandling} from "../services";
 
 // Define the type for the session context
 interface SessionContextType {
@@ -18,13 +18,15 @@ interface SessionContextType {
 interface SessionProviderProps {
     baseURL: string;
     children: ReactNode;
+    /** Path to redirect to when session expires or 401 is received. Defaults to "/login" */
+    loginPath?: string;
 }
 
 // Create a context to hold the session information
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 // Create a SessionProvider component
-export function SessionProvider({baseURL, children}: SessionProviderProps) {
+export function SessionProvider({baseURL, children, loginPath = "/login"}: SessionProviderProps) {
     const [user, setUser] = useState<LoginResponse | null>(null);
     const [language, setLanguage] = useState<string>("en");
     const languageKey: string = "language";
@@ -48,12 +50,31 @@ export function SessionProvider({baseURL, children}: SessionProviderProps) {
 
     }, [VEMPAIN_LOCAL_STORAGE_KEY, languageKey]);
 
+    // Set up the unauthorized callback to handle 401 responses from API calls
+    useEffect(() => {
+        setOnUnauthorizedCallback(() => {
+            // Clear the user state
+            setUser(null);
+            // Clear local storage
+            authAPI.logout();
+            // Redirect to login page
+            window.location.href = loginPath;
+        });
+
+        // Cleanup on unmount
+        return () => {
+            setOnUnauthorizedCallback(() => {});
+        };
+    }, [loginPath]);
+
     // Function to handle login
     const loginUser = (loginRequest: LoginRequest): Promise<LoginStatus> => {
         return authAPI.login(loginRequest)
                 .then((jwtResponse) => {
                     localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
                     setUser(jwtResponse);
+                    // Reset the unauthorized handling flag to allow future 401 responses to be handled
+                    resetUnauthorizedHandling();
                     return {
                         status: ActionResultEnum.SUCCESS,
                         message: "Login successful"
