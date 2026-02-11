@@ -14,7 +14,7 @@ export function AuthVerify({logOut}: AuthVerifyProps) {
         const session: LoginResponse = JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) || "{}");
 
         if (session !== null && session.expires_at) {
-            const sessionExpiry = session.expires_at;
+            const sessionExpiry = dayjs(session.expires_at);
 
             if (sessionExpiry.isBefore(dayjs())) {
                 logOut();
