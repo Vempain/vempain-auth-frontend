@@ -12,3 +12,6 @@ coverage
 .npmrc
 
 src/buildInfo.json
+
+# Yarn state files
+.yarn/install-state.gz

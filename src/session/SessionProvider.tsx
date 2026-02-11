@@ -1,5 +1,5 @@
 import type {ReactNode} from "react";
-import {createContext, useContext, useEffect, useState} from "react";
+import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {AuthAPI, setOnUnauthorizedCallback, clearOnUnauthorizedCallback, resetUnauthorizedHandling} from "../services";
 
@@ -31,7 +31,8 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
     const [language, setLanguage] = useState<string>("en");
     const languageKey: string = "language";
 
-    const authAPI = new AuthAPI(baseURL);
+    // Memoize authAPI instance to prevent creating a new instance on every render
+    const authAPI = useMemo(() => new AuthAPI(baseURL), [baseURL]);
 
     // Check if user data exists in local storage on initial load
     useEffect(() => {
@@ -65,7 +66,7 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
         return () => {
             clearOnUnauthorizedCallback();
         };
-    }, [loginPath]);
+    }, [loginPath, authAPI]);
 
     // Function to handle login
     const loginUser = (loginRequest: LoginRequest): Promise<LoginStatus> => {
