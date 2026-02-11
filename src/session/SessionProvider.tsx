@@ -1,7 +1,7 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
-import {AuthAPI, setOnUnauthorizedCallback, resetUnauthorizedHandling} from "../services";
+import {AuthAPI, setOnUnauthorizedCallback, clearOnUnauthorizedCallback, resetUnauthorizedHandling} from "../services";
 
 // Define the type for the session context
 interface SessionContextType {
@@ -63,7 +63,7 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
 
         // Cleanup on unmount
         return () => {
-            setOnUnauthorizedCallback(() => {});
+            clearOnUnauthorizedCallback();
         };
     }, [loginPath]);
 
