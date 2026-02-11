@@ -55,10 +55,8 @@ function handleUnauthorized(): void {
         onUnauthorizedCallback();
     }
 
-    // Reset the flag after a short delay to allow for any cleanup
-    setTimeout(() => {
-        isHandlingUnauthorized = false;
-    }, 1000);
+    // Note: isHandlingUnauthorized remains true until explicitly reset via resetUnauthorizedHandling()
+    // This prevents repeated unauthorized callbacks if the app continues making requests
 }
 
 /**
