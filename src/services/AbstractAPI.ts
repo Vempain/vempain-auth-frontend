@@ -1,5 +1,6 @@
 import Axios, {type AxiosInstance} from "axios";
 import {type LoginResponse, type PagedResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {setupAuthInterceptor} from "./AuthInterceptor";
 
 export abstract class AbstractAPI<REQUEST, RESPONSE> {
     protected axiosInstance: AxiosInstance;
@@ -8,6 +9,9 @@ export abstract class AbstractAPI<REQUEST, RESPONSE> {
         this.axiosInstance = Axios.create({
             baseURL: baseURL + member
         });
+
+        // Set up the auth interceptor to handle 401 responses
+        setupAuthInterceptor(this.axiosInstance);
     }
 
     public async findAll(params?: Record<string, any>): Promise<RESPONSE[]> {
