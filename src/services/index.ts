@@ -4,6 +4,7 @@ export {
     setOnUnauthorizedCallback,
     clearOnUnauthorizedCallback,
     resetUnauthorizedHandling,
+    setLoginPath,
     setupAuthInterceptor,
     removeAuthInterceptor
 } from './AuthInterceptor';
