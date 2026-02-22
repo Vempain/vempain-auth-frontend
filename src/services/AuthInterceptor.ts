@@ -1,4 +1,4 @@
-import type {AxiosInstance, AxiosError} from "axios";
+import type {AxiosError, AxiosInstance} from "axios";
 import {VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 
 // Type for the unauthorized callback function
@@ -72,7 +72,8 @@ export function setupAuthInterceptor(axiosInstance: AxiosInstance): number {
         (response) => response,
         // On error, check if it's a 401 and handle accordingly
         (error: AxiosError) => {
-            if (error.response?.status === 401) {
+            if (error.response?.status === 401
+                || error.response?.status === 403) {
                 handleUnauthorized();
             }
             // Always reject the promise so the calling code can handle the error if needed
