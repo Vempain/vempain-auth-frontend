@@ -75,8 +75,8 @@ function handleUnauthorized(): void {
         try {
             onUnauthorizedCallback();
         } catch (e) {
-            console.error("AuthInterceptor: Error in unauthorized callback, falling back to redirect", e);
-            // Fall through to the fallback redirect below
+            console.error("AuthInterceptor: Error in unauthorized callback, performing immediate fallback redirect", e);
+            // Perform immediate fallback redirect if the unauthorized callback fails
             window.location.href = configuredLoginPath;
         }
     } else {
