@@ -1,7 +1,7 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
-import {AuthAPI, setOnUnauthorizedCallback, clearOnUnauthorizedCallback, resetUnauthorizedHandling} from "../services";
+import {AuthAPI, clearOnUnauthorizedCallback, resetUnauthorizedHandling, setLoginPath, setOnUnauthorizedCallback} from "../services";
 
 // Define the type for the session context
 interface SessionContextType {
@@ -53,6 +53,9 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
 
     // Set up the unauthorized callback to handle 401 responses from API calls
     useEffect(() => {
+        // Configure the login path for fallback redirect (works even if callback fails)
+        setLoginPath(loginPath);
+
         setOnUnauthorizedCallback(() => {
             // Clear the user state
             setUser(null);
@@ -69,25 +72,24 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
     }, [loginPath, authAPI]);
 
     // Function to handle login
-    const loginUser = (loginRequest: LoginRequest): Promise<LoginStatus> => {
-        return authAPI.login(loginRequest)
-                .then((jwtResponse) => {
-                    localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
-                    setUser(jwtResponse);
-                    // Reset the unauthorized handling flag to allow future 401 responses to be handled
-                    resetUnauthorizedHandling();
-                    return {
-                        status: ActionResultEnum.SUCCESS,
-                        message: "Login successful"
-                    };
-                })
-                .catch((error) => {
-                    return {
-                        status: ActionResultEnum.FAILURE,
-                        message: "Failed to log on user: " + error.message
-                    };
-                });
-    };
+    async function loginUser(loginRequest: LoginRequest): Promise<LoginStatus> {
+        try {
+            const jwtResponse = await authAPI.login(loginRequest);
+            localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
+            setUser(jwtResponse);
+            // Reset the unauthorized handling flag to allow future 401 responses to be handled
+            resetUnauthorizedHandling();
+            return {
+                status: ActionResultEnum.SUCCESS,
+                message: "Login successful"
+            };
+        } catch (error: any) {
+            return {
+                status: ActionResultEnum.FAILURE,
+                message: "Failed to log on user: " + error.message
+            };
+        }
+    }
 
     // Function to handle logout
     const logoutUser = () => {
