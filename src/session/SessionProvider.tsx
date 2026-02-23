@@ -73,25 +73,22 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
 
     // Function to handle login
     async function loginUser(loginRequest: LoginRequest): Promise<LoginStatus> {
-        let loginStatus: LoginStatus = {
-            status: ActionResultEnum.SUCCESS,
-            message: "Login successful"
+        try {
+            const jwtResponse = await authAPI.login(loginRequest);
+            localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
+            setUser(jwtResponse);
+            // Reset the unauthorized handling flag to allow future 401 responses to be handled
+            resetUnauthorizedHandling();
+            return {
+                status: ActionResultEnum.SUCCESS,
+                message: "Login successful"
+            };
+        } catch (error: any) {
+            return {
+                status: ActionResultEnum.FAILURE,
+                message: "Failed to log on user: " + error.message
+            };
         }
-        authAPI.login(loginRequest)
-                .then((jwtResponse) => {
-                    localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
-                    setUser(jwtResponse);
-                    // Reset the unauthorized handling flag to allow future 401 responses to be handled
-                    resetUnauthorizedHandling();
-                })
-                .catch((error) => {
-                    loginStatus = {
-                        status: ActionResultEnum.FAILURE,
-                        message: "Failed to log on user: " + error.message
-                    };
-                });
-
-        return loginStatus;
     }
 
     // Function to handle logout
