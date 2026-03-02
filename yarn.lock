@@ -2252,6 +2252,7 @@ __metadata:
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"
     react-router: "npm:^7.13.1"
+    react-router-dom: "npm:^7.13.1"
     ts-jest: "npm:^29.4.6"
     typescript: "npm:^5.9.3"
     typescript-eslint: "npm:^8.56.1"
@@ -5239,7 +5240,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:^7.13.1":
+"react-router-dom@npm:^7.13.1":
+  version: 7.13.1
+  resolution: "react-router-dom@npm:7.13.1"
+  dependencies:
+    react-router: "npm:7.13.1"
+  peerDependencies:
+    react: ">=18"
+    react-dom: ">=18"
+  checksum: 10c0/2b8ed9dc753f1f7be599a53a00900df04e2b4d1186b0a4d63004eebb2250cd78cd6837ff15fcada5f88d53ad127fff0d1de31468715dcd6dd79dad8cfa8414e9
+  languageName: node
+  linkType: hard
+
+"react-router@npm:7.13.1, react-router@npm:^7.13.1":
   version: 7.13.1
   resolution: "react-router@npm:7.13.1"
   dependencies:
