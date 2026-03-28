@@ -49,4 +49,4 @@ GPL-2 License
 
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
-
+[AGENTS.md](docs/AGENTS.md) has more detailed orientation and workflow guidance for agents working in this codebase.
