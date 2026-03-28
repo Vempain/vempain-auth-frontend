@@ -1,3 +1,4 @@
+import type {FormProps} from "antd";
 import {Alert, Button, Checkbox, Form, Input, Space, Spin} from "antd";
 import {useState} from "react";
 import {useSession} from "../session";
@@ -7,9 +8,9 @@ import {ActionResult, ActionResultEnum, type LoginStatus, type SubmitResult} fro
 
 function Login() {
     type FieldType = {
-        username?: string;
-        password?: string;
-        remember?: string;
+        username: string;
+        password: string;
+        remember: boolean;
     };
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -17,12 +18,15 @@ function Login() {
     const navigate: NavigateFunction = useNavigate();
     const [loginResults, setLoginResults] = useState<SubmitResult>({status: ActionResult.NO_CHANGE, message: ""});
 
-    async function onFinish(values: any): Promise<void> {
+    const onFinish: NonNullable<FormProps<FieldType>["onFinish"]> = async (values): Promise<void> => {
         setLoading(true);
 
+        const username = values.username ?? "";
+        const password = values.password ?? "";
+
         const loginRequest: LoginRequest = {
-            login: values.username,
-            password: values.password
+            login: username,
+            password: password
         };
 
         const loginStatus: LoginStatus = await loginUser(loginRequest);
@@ -34,9 +38,9 @@ function Login() {
         }
 
         setLoading(false);
-    }
+    };
 
-    const onFinishFailed = (errorInfo: any) => {
+    const onFinishFailed: NonNullable<FormProps<FieldType>["onFinishFailed"]> = (errorInfo) => {
         console.log("Failed:", errorInfo);
     };
 

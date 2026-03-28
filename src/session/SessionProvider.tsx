@@ -3,6 +3,35 @@ import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {AuthAPI, clearOnUnauthorizedCallback, resetUnauthorizedHandling, setLoginPath, setOnUnauthorizedCallback} from "../services";
 
+const LANGUAGE_STORAGE_KEY = "language";
+
+function getStoredSession(): LoginResponse | null {
+    const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
+
+    if (!userData) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(userData) as LoginResponse;
+    } catch {
+        localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
+        return null;
+    }
+}
+
+function getStoredLanguage(): string {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) ?? "en";
+}
+
+function getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    return String(error);
+}
+
 // Define the type for the session context
 interface SessionContextType {
     userSession: LoginResponse | null;
@@ -27,29 +56,11 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 // Create a SessionProvider component
 export function SessionProvider({baseURL, children, loginPath = "/login"}: SessionProviderProps) {
-    const [user, setUser] = useState<LoginResponse | null>(null);
-    const [language, setLanguage] = useState<string>("en");
-    const languageKey: string = "language";
+    const [user, setUser] = useState<LoginResponse | null>(() => getStoredSession());
+    const [language, setLanguage] = useState<string>(() => getStoredLanguage());
 
     // Memoize authAPI instance to prevent creating a new instance on every render
     const authAPI = useMemo(() => new AuthAPI(baseURL), [baseURL]);
-
-    // Check if user data exists in local storage on initial load
-    useEffect(() => {
-        const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
-
-        if (userData) {
-            setUser(JSON.parse(userData));
-        }
-
-        const languageData = localStorage.getItem(languageKey);
-        if (languageData) {
-            setLanguage(languageData);
-        } else {
-            setLanguage("en");
-        }
-
-    }, [VEMPAIN_LOCAL_STORAGE_KEY, languageKey]);
 
     // Set up the unauthorized callback to handle 401 responses from API calls
     useEffect(() => {
@@ -83,10 +94,10 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
                 status: ActionResultEnum.SUCCESS,
                 message: "Login successful"
             };
-        } catch (error: any) {
+        } catch (error: unknown) {
             return {
                 status: ActionResultEnum.FAILURE,
-                message: "Failed to log on user: " + error.message
+                message: "Failed to log on user: " + getErrorMessage(error)
             };
         }
     }
@@ -99,7 +110,7 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
 
     const setSessionLanguage = (language: string) => {
         setLanguage(language);
-        localStorage.setItem(languageKey, language);
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     };
 
     const getSessionLanguage = () => {

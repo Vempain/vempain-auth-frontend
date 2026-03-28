@@ -1,3 +1,4 @@
+import {describe, expect, it} from "@jest/globals";
 import {validateParamId} from "../tools";
 
 describe('validationTools.ts Tests', () => {

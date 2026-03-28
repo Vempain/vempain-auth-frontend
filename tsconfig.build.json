@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
+    "rootDir" : "src",
     "outDir": "dist",
     "declaration": true,
     "noEmit": false,
@@ -11,6 +12,7 @@
   "exclude": [
     "**/*.spec.ts",
     "**/*.test.ts",
-    "**/tests/**"
+    "**/tests/**",
+    "**/__tests__/**"
   ]
 }

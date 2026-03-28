@@ -20,7 +20,7 @@ function gitFetch() {
 function getLatestTag() {
     try {
         return execSync('git describe --tags --abbrev=0 2>/dev/null').toString().trim();
-    } catch (error) {
+    } catch {
         return null;
     }
 }
