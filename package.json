@@ -31,7 +31,7 @@
     "test:coverage" : "jest --coverage ."
   },
   "dependencies" : {
-    "antd" : "^6.3.4",
+    "antd" : "^6.3.5",
     "dayjs" : "^1.11.20",
     "env-cmd" : "^11.0.0",
     "jsonwebtoken" : "^9.0.3",
@@ -60,7 +60,7 @@
     "react-dom" : "^19.2.4",
     "react-router-dom" : "^7.13.2",
     "ts-jest" : "^29.4.6",
-    "typescript-eslint" : "^8.57.2"
+    "typescript-eslint" : "^8.58.0"
   },
   "repository" : {
     "type" : "git",
