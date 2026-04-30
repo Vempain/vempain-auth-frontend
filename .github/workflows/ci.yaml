@@ -1,4 +1,4 @@
-name: Build and Publish Package
+name: CI
 
 on:
   pull_request:
@@ -8,155 +8,11 @@ on:
     branches: [ main ]
     tags: [ 'v*.*.*' ]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
-  test:
-    name: Run all tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          registry-url: 'https://npm.pkg.github.com'
-
-      - name: Cache Yarn
-        uses: actions/cache@v5
-        with:
-          path: .yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
-
-      - name: Clean and install dependencies
-        run: |
-          yarn cache clean
-          yarn install
-
-      - name: Run tests
-        run: yarn test
-
-      - name: Run coverage
-        run: yarn test:coverage
-
-  publish:
-    name: Package and publish to GitHub NPM
-    runs-on: ubuntu-latest
-    needs: test
-    permissions:
-      contents: read
-      packages: write
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          registry-url: 'https://npm.pkg.github.com'
-
-      - name: Cache Yarn
-        uses: actions/cache@v5
-        with:
-          path: .yarn/cache
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
-
-      - name: Clean and install dependencies
-        run: |
-          yarn cache clean
-          yarn install
-
-      - name: Build
-        run: yarn build:production
-
-      - name: Get main and base version
-        id: basemain
-        shell: bash
-        run: |
-          baseVersion=$(cat VERSION)
-          mainVersion=$(echo ${baseVersion} | cut -d '.' -f 1)
-          echo "baseVersion=${baseVersion}" >> $GITHUB_OUTPUT
-          echo "mainVersion=${mainVersion}" >> $GITHUB_OUTPUT
-
-      - name: Generate new version
-        id: newVer
-        shell: bash
-        run: |
-          git fetch --tags origin
-          currentVersion=$(git tag --list --sort=-version:refname "${baseVersion}.*" | head -n 1 || "${baseVersion}.0")
-
-          if [ -z "${currentVersion}" ]; then
-            newVersion="${baseVersion}.0"
-          else
-            runningNumber=$(echo ${currentVersion} | cut -f 3 -d '.')
-            newVersion="${baseVersion}.$((${runningNumber} + 1))"
-          fi
-          echo "The generated new version is: ${newVersion}"
-          echo "newVersion=${newVersion}" >> $GITHUB_OUTPUT
-        env:
-          baseVersion: ${{ steps.basemain.outputs.baseVersion }}
-
-      - name: Set new package version
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-        run: |
-          echo "Setting version from tag: ${newVersion}"
-          yarn version --immediate ${newVersion}
-        env:
-          newVersion: ${{ steps.newVer.outputs.newVersion }}
-
-      - name: Publish to GitHub Packages
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-        run: |
-          echo "registry=https://npm.pkg.github.com" > .npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.VEMPAIN_ACTION_TOKEN }}" >> .npmrc
-          echo "@vempain:registry=https://npm.pkg.github.com" >> .npmrc
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
-
-      - name: Create tag
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-        uses: actions/github-script@v9
-        with:
-          github-token: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.newVer.outputs.newVersion }}',
-              sha: context.sha
-            })
-
-      - name: Create GitHub Release
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
-        uses: actions/github-script@v9
-        with:
-          github-token: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
-          script: |
-            const tag = '${{ steps.newVer.outputs.newVersion }}';
-            const resp = await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: tag,
-              name: `Release ${tag}`,
-              body: `Automated release for ${tag}
-
-              NPM tags pushed:
-              - latest
-              - ${{ steps.basemain.outputs.mainVersion }}
-              - ${{ steps.basemain.outputs.baseVersion }}
-              - ${tag}
-              `,
-              draft: false,
-              prerelease: false,
-              generate_release_notes: true
-            });
-            core.info(`Release created: ${resp.data.html_url}`);
+  ci:
+    uses: Vempain/vempain-workflows/.github/workflows/frontend-library.yaml@main
+    secrets: inherit
