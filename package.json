@@ -36,8 +36,8 @@
   },
   "peerDependencies" : {
     "axios" : "^1.13.5",
-    "react" : "^19.2.5",
-    "react-dom" : "^19.2.5",
+    "react" : "^19.2.6",
+    "react-dom" : "^19.2.6",
     "react-router-dom" : "^7.14.1"
   },
   "devDependencies" : {
@@ -46,18 +46,18 @@
     "@types/jest" : "^30.0.0",
     "@types/react" : "^19.2.14",
     "@types/react-dom" : "^19.2.3",
-    "axios" : "^1.15.2",
+    "axios" : "^1.16.0",
     "eslint" : "^10.3.0",
     "eslint-plugin-react-hooks" : "^7.1.1",
     "eslint-plugin-react-refresh" : "^0.5.2",
-    "jest" : "^30.3.0",
-    "jest-environment-jsdom" : "^30.3.0",
-    "react" : "^19.2.5",
-    "react-dom" : "^19.2.5",
-    "react-router-dom" : "^7.14.2",
+    "jest" : "^30.4.2",
+    "jest-environment-jsdom" : "^30.4.1",
+    "react" : "^19.2.6",
+    "react-dom" : "^19.2.6",
+    "react-router-dom" : "^7.15.0",
     "ts-jest" : "^29.4.9",
     "typescript" : "^6.0.3",
-    "typescript-eslint" : "^8.59.1"
+    "typescript-eslint" : "^8.59.3"
   },
   "repository" : {
     "type" : "git",
