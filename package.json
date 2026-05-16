@@ -35,7 +35,7 @@
     "dayjs" : "^1.11.20"
   },
   "peerDependencies" : {
-    "axios" : "^1.13.5",
+    "axios" : "1.15.2",
     "react" : "^19.2.5",
     "react-dom" : "^19.2.5",
     "react-router-dom" : "^7.14.1"
@@ -46,7 +46,7 @@
     "@types/jest" : "^30.0.0",
     "@types/react" : "^19.2.14",
     "@types/react-dom" : "^19.2.3",
-    "axios" : "1.14.0",
+    "axios" : "1.15.2",
     "eslint" : "^10.4.0",
     "eslint-plugin-react-hooks" : "^7.1.1",
     "eslint-plugin-react-refresh" : "^0.5.2",
