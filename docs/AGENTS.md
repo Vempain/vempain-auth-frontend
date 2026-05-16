@@ -42,6 +42,7 @@
 - Formatting is driven by `.editorconfig`: 4 spaces, LF, max line length 160, spaces inside braces/imports, and typically double-quoted strings in TS/TSX.
 - This repo favors named exports (`export {Login}` / `export function SessionProvider`) and barrel files (`src/*/index.ts`). Update barrel exports when adding
   public modules.
+- Vempain API JSON keys are mandatory snake_case end-to-end; keep request/response models aligned to snake_case and do not introduce camelCase JSON keys.
 - Type-only imports/exports are used consistently, e.g. `import type {LoginRequest}` and `export type {BuildInfo}`.
 - Tests live under `src/__tests__/` and use Jest + `ts-jest` in ESM mode; see `src/__tests__/tools-validationTools-test.ts` for the current style.
 
