@@ -31,11 +31,11 @@
     "test:coverage" : "jest --coverage ."
   },
   "dependencies" : {
-    "antd" : "^6.4.3",
-    "dayjs" : "^1.11.20"
+    "antd" : "^6.4.4",
+    "dayjs" : "^1.11.21"
   },
   "peerDependencies" : {
-    "axios" : "1.16.1",
+    "axios" : "1.18.0",
     "react" : "^19.2.5",
     "react-dom" : "^19.2.5",
     "react-router-dom" : "^7.14.1"
@@ -44,20 +44,20 @@
     "@eslint/js" : "^10.0.1",
     "@testing-library/jest-dom" : "^6.9.1",
     "@types/jest" : "^30.0.0",
-    "@types/react" : "^19.2.15",
+    "@types/react" : "^19.2.17",
     "@types/react-dom" : "^19.2.3",
-    "axios" : "1.16.1",
-    "eslint" : "^10.4.0",
+    "axios" : "1.18.0",
+    "eslint" : "^10.5.0",
     "eslint-plugin-react-hooks" : "^7.1.1",
-    "eslint-plugin-react-refresh" : "^0.5.2",
+    "eslint-plugin-react-refresh" : "^0.5.3",
     "jest" : "^30.4.2",
     "jest-environment-jsdom" : "^30.4.1",
-    "react" : "^19.2.6",
-    "react-dom" : "^19.2.6",
-    "react-router-dom" : "^7.15.1",
+    "react" : "^19.2.7",
+    "react-dom" : "^19.2.7",
+    "react-router-dom" : "^7.17.0",
     "ts-jest" : "^29.4.11",
     "typescript" : "^6.0.3",
-    "typescript-eslint" : "^8.59.4"
+    "typescript-eslint" : "^8.61.0"
   },
   "repository" : {
     "type" : "git",
