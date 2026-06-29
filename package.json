@@ -31,7 +31,7 @@
     "test:coverage" : "jest --coverage ."
   },
   "dependencies" : {
-    "antd" : "^6.4.3",
+    "antd" : "^6.5.0",
     "dayjs" : "^1.11.21"
   },
   "peerDependencies" : {
