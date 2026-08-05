@@ -1,11 +1,11 @@
 import Axios, {type AxiosInstance} from "axios";
-import {type LoginResponse, type PagedResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {type LoginResponse, type PagedRequest, type PagedResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {setupAuthInterceptor} from "./AuthInterceptor";
 
 export abstract class AbstractAPI<REQUEST, RESPONSE> {
     protected axiosInstance: AxiosInstance;
 
-    constructor(baseURL: string, member: string) {
+    protected constructor(baseURL: string, member: string) {
         this.axiosInstance = Axios.create({
             baseURL: baseURL + member
         });
@@ -23,12 +23,12 @@ export abstract class AbstractAPI<REQUEST, RESPONSE> {
 
     /**
      * This should be used instead of findAll() when you want to use pagination.
-     * @param params
+     * @param pagedRequest
      */
-    public async findPageable(params?: Record<string, unknown>): Promise<PagedResponse<RESPONSE>> {
+    public async findPageable(pagedRequest: PagedRequest): Promise<PagedResponse<RESPONSE>> {
         this.setAuthorizationHeader();
         this.axiosInstance.defaults.headers.put['Content-Type'] = 'application/json;charset=utf-8';
-        const response = await this.axiosInstance.get<PagedResponse<RESPONSE>>("", {params: params});
+        const response = await this.axiosInstance.post<PagedResponse<RESPONSE>>("paged", pagedRequest);
         return response.data;
     }
 
