@@ -1,7 +1,7 @@
 import {useLocation} from "react-router-dom";
 import {useEffect} from "react";
 import {type LoginResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
-import dayjs from "dayjs";
+import {isSessionExpired} from "./sessionExpiration";
 
 interface AuthVerifyProps {
     logOut: () => void;
@@ -11,14 +11,18 @@ export function AuthVerify({logOut}: AuthVerifyProps) {
     const location = useLocation();
 
     useEffect(() => {
-        const session: LoginResponse = JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) || "{}");
+        const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
+        if (!userData) {
+            return;
+        }
 
-        if (session !== null && session.expires_at) {
-            const sessionExpiry = dayjs(session.expires_at);
-
-            if (sessionExpiry.isBefore(dayjs())) {
+        try {
+            const session = JSON.parse(userData) as LoginResponse;
+            if (isSessionExpired(session)) {
                 logOut();
             }
+        } catch {
+            logOut();
         }
     }, [location, logOut]);
 

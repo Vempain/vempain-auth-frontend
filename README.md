@@ -8,6 +8,7 @@ authentication API.
 
 - User login and registration forms
 - Authentication state management
+- Expired persisted sessions are removed before authentication state is restored
 - API integration for authentication
 - Error handling and feedback
 - Responsive UI built with React
@@ -40,6 +41,12 @@ authentication API.
         - `models/Responses/` - Interfaces and types related to response DTOs
     - `services/` - API service classes
     - `session/` - Session provider
+
+## Session expiration
+
+`SessionProvider` validates the stored `vempainUser` session before exposing it through `useSession()`. Sessions with a missing, invalid, or past `expires_at`
+value are removed from local storage and treated as logged out. Route-level
+`AuthVerify` uses the same validation for sessions that expire while the application is open.
 
 ## License
 
