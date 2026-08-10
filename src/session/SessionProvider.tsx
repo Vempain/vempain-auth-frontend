@@ -2,10 +2,11 @@ import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {AuthAPI, clearOnUnauthorizedCallback, resetUnauthorizedHandling, setLoginPath, setOnUnauthorizedCallback} from "../services";
+import {isSessionExpired} from "./sessionExpiration";
 
 const LANGUAGE_STORAGE_KEY = "language";
 
-function getStoredSession(): LoginResponse | null {
+export function getStoredSession(): LoginResponse | null {
     const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
 
     if (!userData) {
@@ -13,7 +14,13 @@ function getStoredSession(): LoginResponse | null {
     }
 
     try {
-        return JSON.parse(userData) as LoginResponse;
+        const session = JSON.parse(userData) as LoginResponse;
+        if (isSessionExpired(session)) {
+            localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
+            return null;
+        }
+
+        return session;
     } catch {
         localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
         return null;
