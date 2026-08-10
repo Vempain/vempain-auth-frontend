@@ -31,7 +31,7 @@
     "test:coverage" : "jest --coverage ."
   },
   "dependencies" : {
-    "antd" : "^6.5.3",
+    "antd" : "^6.5.4",
     "dayjs" : "^1.11.21"
   },
   "peerDependencies" : {
@@ -59,7 +59,7 @@
     "react-router-dom" : "^7.18.2",
     "ts-jest" : "^29.4.12",
     "typescript" : "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint" : "^8.65.0"
+    "typescript-eslint" : "^8.66.0"
   },
   "repository" : {
     "type" : "git",
