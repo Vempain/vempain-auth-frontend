@@ -31,7 +31,7 @@
     "test:coverage": "jest --coverage ."
   },
   "dependencies": {
-    "antd": "^6.6.3",
+    "antd": "^6.6.4",
     "dayjs": "^1.11.23"
   },
   "peerDependencies": {
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@testing-library/dom": "^10.4.1",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.3.0",
@@ -51,14 +51,14 @@
     "axios": "1.20.0",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.6",
-    "jest": "^30.5.1",
-    "jest-environment-jsdom": "^30.5.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-router-dom": "^7.18.3",
+    "react-router-dom": "^7.18.4",
     "ts-jest": "^29.4.12",
-    "typescript": "^6.0.2",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.70.0"
   },
   "repository": {
