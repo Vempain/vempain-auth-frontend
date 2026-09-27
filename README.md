@@ -1,8 +1,7 @@
 # Vempain Auth Frontend
 
-Vempain Auth Frontend is a React-based web component for user authentication designed for the Vempain frontends. It
-provides a user interface for logging in, registering, and managing authentication states, communicating with a backend
-authentication API.
+Vempain Auth Frontend is a React-based web component for user authentication designed for the Vempain frontends. It provides a user interface for logging in,
+registering, and managing authentication states, communicating with a backend authentication API.
 
 ## Features
 
@@ -45,8 +44,8 @@ authentication API.
 ## Session expiration
 
 `SessionProvider` validates the stored `vempainUser` session before exposing it through `useSession()`. Sessions with a missing, invalid, or past `expires_at`
-value are removed from local storage and treated as logged out. Route-level
-`AuthVerify` uses the same validation for sessions that expire while the application is open.
+value are removed from local storage and treated as logged out. Route-level `AuthVerify` uses the same validation for sessions that expire while the application
+is open.
 
 ## License
 
