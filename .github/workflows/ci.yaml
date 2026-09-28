@@ -15,4 +15,6 @@ permissions:
 jobs:
   ci:
     uses: Vempain/vempain-workflows/.github/workflows/frontend-library.yaml@main
-    secrets: inherit
+    secrets:
+      VEMPAIN_ACTION_TOKEN: ${{ secrets.VEMPAIN_ACTION_TOKEN }}
+      COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
