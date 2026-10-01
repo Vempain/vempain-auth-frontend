@@ -7,4 +7,5 @@ export interface PagedRequest {
     direction?: SortDirectionEnum;
     search?: string;
     case_sensitive?: boolean;
+    filter_column?: string;
 }
