@@ -7,10 +7,10 @@ type UnauthorizedCallback = () => void;
 // Store for the unauthorized callback
 let onUnauthorizedCallback: UnauthorizedCallback | null = null;
 
-// Timestamp of last unauthorized handling to debounce rapid 401/403 responses
+// Timestamp of last unauthorized handling to debounce rapid 401 responses
 let lastUnauthorizedHandledAt = 0;
 
-// Debounce window in milliseconds — ignore repeated 401/403 within this period
+// Debounce window in milliseconds — ignore repeated 401 responses within this period
 const UNAUTHORIZED_DEBOUNCE_MS = 2000;
 
 // Default login path for fallback redirect
@@ -55,7 +55,7 @@ export function resetUnauthorizedHandling(): void {
 /**
  * Handles the unauthorized response by clearing the session and calling the callback.
  * Uses a time-based debounce to prevent multiple rapid redirects while still allowing
- * future 401/403 responses to be handled (unlike a permanent flag).
+ * future 401 responses to be handled (unlike a permanent flag).
  */
 function handleUnauthorized(): void {
     const now = Date.now();
@@ -89,7 +89,8 @@ function handleUnauthorized(): void {
 
 /**
  * Sets up axios response interceptor to handle 401 Unauthorized responses.
- * This interceptor will automatically trigger logout when the server returns 401 or 403.
+ * A 403 means the authenticated user lacks permission and must not terminate the
+ * session. Only a 401 indicates that the session cannot be authenticated.
  *
  * @param axiosInstance - The axios instance to add the interceptor to
  * @returns The interceptor ID that can be used to eject the interceptor if needed
@@ -98,10 +99,9 @@ export function setupAuthInterceptor(axiosInstance: AxiosInstance): number {
     return axiosInstance.interceptors.response.use(
         // On success, just return the response
         (response) => response,
-        // On error, check if it's a 401/403 and handle accordingly
+        // On error, only an unauthenticated response should terminate the session.
         (error: AxiosError) => {
-            if (error.response?.status === 401
-                || error.response?.status === 403) {
+            if (error.response?.status === 401) {
                 handleUnauthorized();
             }
             // Always reject the promise so the calling code can handle the error if needed
@@ -119,4 +119,3 @@ export function setupAuthInterceptor(axiosInstance: AxiosInstance): number {
 export function removeAuthInterceptor(axiosInstance: AxiosInstance, interceptorId: number): void {
     axiosInstance.interceptors.response.eject(interceptorId);
 }
-
