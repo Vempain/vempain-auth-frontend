@@ -138,4 +138,4 @@ GPL-2.0
 
 Pull requests are welcome. For major changes, open an issue before starting implementation.
 
-See [docs/AGENTS.md](docs/AGENTS.md) for repository architecture, conventions, and workflow guidance.
+See [AGENTS.md](AGENTS.md) for repository architecture, conventions, and workflow guidance.
