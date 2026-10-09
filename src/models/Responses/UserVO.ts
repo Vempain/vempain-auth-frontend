@@ -1,4 +1,4 @@
-// This mirrors the fi.poltsi.vempain.admin.api.response.UserResponse
+// This mirrors the fi.poltsi.vempain.auth.api.response.UserResponse
 
 import type {AbstractResponse} from "./AbstractResponse.ts";
 
@@ -14,4 +14,6 @@ export interface UserVO extends AbstractResponse {
     birthday: Date;
     description: string;
     password: string;
+    /** IDs of the units the user is a direct member of */
+    unit_ids: number[];
 }
