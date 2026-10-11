@@ -107,7 +107,10 @@ export function AclEditor({acls, parentForm, users, units, fieldName = "acls"}: 
                                                            rules={[{validator: () => validateAclRow("user", index)}]}>
                                                     <Select placeholder={t("AclEditor.placeholders.user", {defaultValue: "Select user"})}
                                                             showSearch optionFilterProp="label" allowClear
-                                                            options={users.map(user => ({value: user.id, label: `${user.name} (${user.login_name})`}))}/>
+                                                            options={users.map(user => ({
+                                                                value: user.id,
+                                                                label: user.name ? `${user.name} (${user.nick})` : user.nick
+                                                            }))}/>
                                                 </Form.Item>
                                             </Col>
                                             <Col span={4}>
