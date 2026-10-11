@@ -65,7 +65,7 @@ function unit(id: number, name: string, unit_ids: number[] = []): UnitVO {
 
 // grand (1) contains parent (2) contains child (3); other (5) is separate
 const allUnits = [unit(1, "grand", [2]), unit(2, "parent", [3]), unit(3, "child"), unit(5, "other")];
-const users = [{id: 7, name: "Seven", login_name: "seven"}] as UserVO[];
+const users = [{id: 7, name: "Seven", nick: "seven", login_name: "seven"}] as UserVO[];
 
 function page<T>(content: T[]) {
     return {content, page: 0, size: 500, total_elements: content.length, total_pages: 1, first: true, last: true, empty: content.length === 0};
@@ -78,7 +78,10 @@ function apis(editing: UnitVO) {
         update: jest.fn(async (payload: UnitVO) => payload),
         create: jest.fn(async (payload: UnitVO) => ({...payload, id: 99}))
     } as unknown as UnitAPI;
-    const userAPI = {findPageable: jest.fn(async () => page(users))} as unknown as UserAPI;
+    const userAPI = {
+        findPageable: jest.fn(async () => page(users)),
+        findById: jest.fn(async () => ({id: 1, name: "Admin", nick: "admin"}))
+    } as unknown as UserAPI;
     return {unitAPI, userAPI};
 }
 

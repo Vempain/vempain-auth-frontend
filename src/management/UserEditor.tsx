@@ -7,6 +7,7 @@ import type {UnitAPI} from "../services/UnitAPI";
 import type {UserAPI} from "../services/UserAPI";
 import {AclEditor} from "./AclEditor";
 import {completeAcls, fullAclFor, loadUsersAndUnits} from "./managementTools";
+import {UserName} from "../tools/UserName";
 
 export const PRIVACY_TYPES = ["PRIVATE", "GROUP", "PUBLIC"] as const;
 
@@ -123,7 +124,7 @@ export function UserEditor({userAPI, unitAPI, userId, currentUserId, onSaved, on
     return (
             <Spin spinning={loading || saving}>
                 <h1>{userId > 0
-                        ? t("UserEditor.title.edit", {defaultValue: "Edit user {{name}}", name: user?.login_name ?? userId})
+                        ? t("UserEditor.title.edit", {defaultValue: "Edit user {{name}}", name: user?.name ?? user?.nick ?? userId})
                         : t("UserEditor.title.create", {defaultValue: "Create new user"})}</h1>
                 {error !== null && <Alert type="error" showIcon title={error} style={{marginBottom: 16}}/>}
                 {user !== null && (
@@ -171,7 +172,7 @@ export function UserEditor({userAPI, unitAPI, userId, currentUserId, onSaved, on
                             </Form.Item>
                             {metadata !== null && userId > 0 && (
                                     <Form.Item label=" " colon={false}>
-                                        {renderMetadata ? renderMetadata(metadata) : <AuditLine metadata={metadata}/>}
+                                        {renderMetadata ? renderMetadata(metadata) : <AuditLine metadata={metadata} userAPI={userAPI}/>}
                                     </Form.Item>
                             )}
                             <Form.Item wrapperCol={{offset: 6, span: 18}}>
@@ -187,14 +188,18 @@ export function UserEditor({userAPI, unitAPI, userId, currentUserId, onSaved, on
 }
 
 /** Compact read-only audit trail used when the host does not supply its own */
-export function AuditLine({metadata}: { metadata: EntityMetadata }) {
+export function AuditLine({metadata, userAPI}: { metadata: EntityMetadata; userAPI: UserAPI }) {
     const {t} = useTranslation();
     const stamp = (value: EntityMetadata["created"] | EntityMetadata["modified"]) => value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "–";
     return (
             <Descriptions size="small" column={{xs: 1, sm: 2, lg: 4}} colon={false} items={[
-                {key: "creator", label: t("AuditLine.createdBy", {defaultValue: "Created by"}), children: `#${metadata.creator}`},
+                {key: "creator", label: t("AuditLine.createdBy", {defaultValue: "Created by"}), children: <UserName userAPI={userAPI} id={metadata.creator}/>},
                 {key: "created", label: t("AuditLine.created", {defaultValue: "Created"}), children: stamp(metadata.created)},
-                {key: "modifier", label: t("AuditLine.modifiedBy", {defaultValue: "Modified by"}), children: metadata.modifier ? `#${metadata.modifier}` : "–"},
+                {
+                    key: "modifier",
+                    label: t("AuditLine.modifiedBy", {defaultValue: "Modified by"}),
+                    children: <UserName userAPI={userAPI} id={metadata.modifier}/>
+                },
                 {key: "modified", label: t("AuditLine.modified", {defaultValue: "Modified"}), children: stamp(metadata.modified)}
             ]}/>
     );

@@ -134,7 +134,10 @@ export function UnitEditor({unitAPI, userAPI, unitId, currentUserId, onSaved, on
                             <Form.Item name="user_ids" label={t("UnitEditor.fields.users", {defaultValue: "Member users"})}>
                                 <Select mode="multiple" allowClear showSearch optionFilterProp="label"
                                         placeholder={t("UnitEditor.placeholders.users", {defaultValue: "Select users"})}
-                                        options={users.map(user => ({value: user.id, label: `${user.name} (${user.login_name})`}))}/>
+                                        options={users.map(user => ({
+                                            value: user.id,
+                                            label: user.name ? `${user.name} (${user.nick})` : user.nick
+                                        }))}/>
                             </Form.Item>
                             <Form.Item name="unit_ids" label={t("UnitEditor.fields.units", {defaultValue: "Member units"})}
                                        rules={[{validator: validateMemberUnits}]}
@@ -150,7 +153,7 @@ export function UnitEditor({unitAPI, userAPI, unitId, currentUserId, onSaved, on
                             </Form.Item>
                             {metadata !== null && unitId > 0 && (
                                     <Form.Item label=" " colon={false}>
-                                        {renderMetadata ? renderMetadata(metadata) : <AuditLine metadata={metadata}/>}
+                                        {renderMetadata ? renderMetadata(metadata) : <AuditLine metadata={metadata} userAPI={userAPI}/>}
                                     </Form.Item>
                             )}
                             <Form.Item wrapperCol={{offset: 6, span: 18}}>
