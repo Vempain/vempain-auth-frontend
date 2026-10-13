@@ -424,13 +424,13 @@ describe("VempainTable on a narrow screen", () => {
         const search = await screen.findByPlaceholderText(placeholder("Email"));
         fireEvent.change(search, {target: {value: "ada"}});
         fireEvent.keyDown(search, {key: "Enter", code: "Enter"});
-        expect(paged.setFilter).toHaveBeenLastCalledWith("email", "ada");
+        await waitFor(() => expect(paged.setFilter).toHaveBeenLastCalledWith("email", "ada"));
 
         fireEvent.click(await screen.findByRole("button", {name: placeholder("Email")}));
         const cleared = await screen.findByPlaceholderText(placeholder("Email"));
         fireEvent.change(cleared, {target: {value: ""}});
         fireEvent.keyDown(cleared, {key: "Enter", code: "Enter"});
-        expect(paged.setFilter).toHaveBeenLastCalledWith(undefined, "");
+        await waitFor(() => expect(paged.setFilter).toHaveBeenLastCalledWith(undefined, ""));
     });
 
     it("renders a plain small table when every column stays visible", async () => {
