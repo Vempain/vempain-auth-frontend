@@ -5,9 +5,8 @@
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {jest} from "@jest/globals";
 import type {UnitVO, UserVO} from "../models";
-import {UnitEditor} from "../management/UnitEditor";
-import type {UnitAPI} from "../services/UnitAPI";
-import type {UserAPI} from "../services/UserAPI";
+import {UnitEditor} from "../management";
+import type {UnitAPI, UserAPI} from "../services";
 
 jest.mock("react-i18next", () => ({
     useTranslation: () => ({
@@ -144,5 +143,70 @@ describe("UnitEditor", () => {
             modify_privilege: true,
             delete_privilege: true
         }]);
+    });
+
+    it("shows a load error when the unit cannot be fetched", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+        const {unitAPI, userAPI} = apis(allUnits[2]);
+        (unitAPI.findById as jest.Mock).mockImplementation(async () => {
+            throw new Error("not found");
+        });
+        render(<UnitEditor unitAPI={unitAPI} userAPI={userAPI} unitId={3} onSaved={jest.fn()}/>);
+
+        await screen.findByText("Failed to load the unit, try again later");
+        expect(screen.getByText("Edit unit 3")).toBeTruthy();
+        expect(screen.queryByText("Save")).toBeNull();
+        expect(errorSpy).toHaveBeenCalledWith("Failed to load the unit:", expect.any(Error));
+        errorSpy.mockRestore();
+    });
+
+    it("shows an update error and a create error when saving fails", async () => {
+        const errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+        const {unitAPI, userAPI} = apis(allUnits[2]);
+        (unitAPI.update as jest.Mock).mockImplementation(async () => {
+            throw new Error("conflict");
+        });
+        (unitAPI.create as jest.Mock).mockImplementation(async () => {
+            throw new Error("conflict");
+        });
+        const onSaved = jest.fn();
+        const {unmount} = render(<UnitEditor unitAPI={unitAPI} userAPI={userAPI} unitId={3} onSaved={onSaved}/>);
+        await screen.findByText("Edit unit child");
+        fireEvent.click(screen.getByText("Save"));
+        await screen.findByText("Failed to update the unit");
+        unmount();
+
+        render(<UnitEditor unitAPI={unitAPI} userAPI={userAPI} unitId={0} currentUserId={7} onSaved={onSaved}/>);
+        await screen.findByText("Create new unit");
+        fireEvent.change(screen.getAllByRole("textbox")[0], {target: {value: "new unit"}});
+        // A new unit may contain any unit; the cycle check only applies to saved units
+        fireEvent.mouseDown(screen.getAllByRole("combobox")[1]);
+        fireEvent.click(await screen.findByText("grand"));
+        fireEvent.click(screen.getByText("Save"));
+
+        await screen.findByText("Failed to create the unit");
+        expect((unitAPI.create as jest.Mock).mock.calls[0][0]).toMatchObject({name: "new unit", unit_ids: [1]});
+        expect(onSaved).not.toHaveBeenCalled();
+        errorSpy.mockRestore();
+    });
+
+    it("offers cancel and the host's own metadata rendering", async () => {
+        const {unitAPI, userAPI} = apis(allUnits[2]);
+        const onCancel = jest.fn();
+        const renderMetadata = jest.fn(() => <span>custom metadata</span>);
+        render(<UnitEditor unitAPI={unitAPI} userAPI={userAPI} unitId={3} onSaved={jest.fn()} onCancel={onCancel} renderMetadata={renderMetadata}/>);
+
+        await screen.findByText("custom metadata");
+        expect(renderMetadata).toHaveBeenCalledWith(expect.objectContaining({creator: 1, modifier: null}));
+        fireEvent.click(screen.getByText("Cancel"));
+        expect(onCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it("renders the built-in audit line for a saved unit", async () => {
+        const {unitAPI, userAPI} = apis(allUnits[2]);
+        render(<UnitEditor unitAPI={unitAPI} userAPI={userAPI} unitId={3} onSaved={jest.fn()}/>);
+
+        await screen.findByText("Created by");
+        await screen.findByText("Admin (admin)");
     });
 });

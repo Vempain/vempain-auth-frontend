@@ -638,7 +638,12 @@ function VempainTableView<RecordType extends object>(props: VempainTableViewProp
                                         defaultValue={currentValue === undefined ? String(readDataIndex(record, selectedColumn.dataIndex) ?? "") : String(currentValue)}
                                         placeholder={t("common.table.filter.searchColumn", {column: name})}
                                         aria-label={t("common.table.filter.searchColumn", {column: name})}
-                                        onSearch={(value) => applyMobileFilter(mobileSearch, value)}
+                                        onSearch={(value, event) => {
+                                            if (!event || !("key" in event)) {
+                                                applyMobileFilter(mobileSearch, value);
+                                            }
+                                        }}
+                                        onPressEnter={(event) => applyMobileFilter(mobileSearch, event.currentTarget.value)}
                                         onBlur={() => setMobileSearch(undefined)}
                                         style={{marginTop: 8}}
                                 />

@@ -62,6 +62,7 @@ function Host({acls, onValues}: { acls: AclVO[]; onValues: (values: { acls: AclV
             <Form form={form} initialValues={{acls}} onFinish={onValues}>
                 <AclEditor acls={acls} parentForm={form} users={users} units={units}/>
                 <button type="button" onClick={() => onValues(form.getFieldsValue())}>read values</button>
+                <button type="submit">submit</button>
             </Form>
     );
 }
@@ -106,5 +107,51 @@ describe("AclEditor", () => {
 
         fireEvent.click(screen.getByRole("button", {name: "Remove row"}));
         await waitFor(() => expect(screen.queryAllByTestId("acl-row")).toHaveLength(0));
+    });
+
+    it("submits a valid row and rejects a row that names both a user and a unit", async () => {
+        const onValues = jest.fn();
+        const {unmount} = render(<Host acls={[row({read_privilege: true})]} onValues={onValues}/>);
+        fireEvent.click(await screen.findByText("submit"));
+        await waitFor(() => expect(onValues).toHaveBeenCalledTimes(1));
+        unmount();
+
+        render(<Host acls={[row({unit: 3, read_privilege: true})]} onValues={onValues}/>);
+        fireEvent.click(await screen.findByText("submit"));
+
+        await screen.findAllByText("Select either a user or a unit, not both.");
+        expect(onValues).toHaveBeenCalledTimes(1);
+    });
+
+    it("rejects a row without a grantee and a row without read", async () => {
+        const onValues = jest.fn();
+        const {unmount} = render(<Host acls={[row({user: null, read_privilege: true})]} onValues={onValues}/>);
+        fireEvent.click(await screen.findByText("submit"));
+        await screen.findAllByText("Either a user or a unit must be selected.");
+        unmount();
+
+        render(<Host acls={[row({read_privilege: false, modify_privilege: true})]} onValues={onValues}/>);
+        fireEvent.click(await screen.findByText("submit"));
+
+        await screen.findAllByText("Read privilege must be selected.");
+        expect(onValues).not.toHaveBeenCalled();
+    });
+
+    it("delete requires modify, also when the switches are toggled", async () => {
+        const onValues = jest.fn();
+        render(<Host acls={[row({read_privilege: true})]} onValues={onValues}/>);
+        await waitFor(() => expect(screen.getAllByRole("switch")).toHaveLength(4));
+        const [, , modify, del] = screen.getAllByRole("switch");
+
+        fireEvent.click(del);
+        await screen.findByText("Delete privilege requires modify privilege.");
+        fireEvent.click(screen.getByText("submit"));
+        expect(onValues).not.toHaveBeenCalled();
+
+        fireEvent.click(modify);
+        await waitFor(() => expect(screen.queryByText("Delete privilege requires modify privilege.")).toBeNull());
+        fireEvent.click(screen.getByText("submit"));
+        await waitFor(() => expect(onValues).toHaveBeenCalledTimes(1));
+        expect(onValues.mock.calls[0][0] as { acls: AclVO[] }).toMatchObject({acls: [{modify_privilege: true, delete_privilege: true}]});
     });
 });
