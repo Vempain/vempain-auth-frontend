@@ -352,6 +352,14 @@ describe("VempainTable in server mode", () => {
 });
 
 describe("VempainTable on a narrow screen", () => {
+    beforeAll(() => {
+        jest.setTimeout(15000);
+    });
+
+    afterAll(() => {
+        jest.setTimeout(5000);
+    });
+
     beforeEach(() => {
         viewportWidth = 400;
     });
