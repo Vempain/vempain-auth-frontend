@@ -352,14 +352,6 @@ describe("VempainTable in server mode", () => {
 });
 
 describe("VempainTable on a narrow screen", () => {
-    beforeAll(() => {
-        jest.setTimeout(15000);
-    });
-
-    afterAll(() => {
-        jest.setTimeout(5000);
-    });
-
     beforeEach(() => {
         viewportWidth = 400;
     });
@@ -410,7 +402,7 @@ describe("VempainTable on a narrow screen", () => {
         fireEvent.change(cleared, {target: {value: ""}});
         fireEvent.keyDown(cleared, {key: "Enter", code: "Enter"});
         await waitFor(() => expect(rowNames()).toEqual(["Grace", "Ada"]));
-    });
+    }, 15000);
 
     it("filters an enum column from the collapsed row through a select", async () => {
         render(<VempainTable<Row> columns={columns()} dataSource={rows} rowKey="id"/>);
@@ -421,7 +413,7 @@ describe("VempainTable on a narrow screen", () => {
         fireEvent.click(await screen.findByText("Inactive"));
 
         await waitFor(() => expect(rowNames()).toEqual(["Ada"]));
-    });
+    }, 15000);
 
     it("replaces the backend filter from the collapsed row in server mode", async () => {
         const paged = pagedState();
@@ -439,7 +431,7 @@ describe("VempainTable on a narrow screen", () => {
         fireEvent.change(cleared, {target: {value: ""}});
         fireEvent.keyDown(cleared, {key: "Enter", code: "Enter"});
         await waitFor(() => expect(paged.setFilter).toHaveBeenLastCalledWith(undefined, ""));
-    });
+    }, 15000);
 
     it("renders a plain small table when every column stays visible", async () => {
         const {container} = render(
@@ -450,5 +442,5 @@ describe("VempainTable on a narrow screen", () => {
         await waitFor(() => expect(container.querySelector(".ant-table-small")).not.toBeNull());
         expect(screen.queryByRole("button", {name: "Expand row"})).toBeNull();
         expect(rowNames()).toEqual(["Grace", "Ada"]);
-    });
+    }, 15000);
 });
