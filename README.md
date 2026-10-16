@@ -11,6 +11,8 @@ and logout components, session context, session-expiration checks, and Axios-bas
 - `AuthVerify` for checking session expiration during route changes
 - Axios response handling for `401 Unauthorized` and `403 Forbidden` responses
 - `AbstractAPI` helpers for authenticated CRUD requests and pageable queries
+- `UserList`, `UserEditor`, `UnitList` and `UnitEditor` management screens, and the ACL row editor `AclRowsEditor` (with `AclEditor`
+  for rows in the `AclVO` shape) that every Vempain frontend mounts on its own forms
 - TypeScript models for authentication, paging, sorting, ACL, and API responses
 
 ## Requirements
@@ -125,6 +127,7 @@ pushes to `main`, and version tags.
 ## Project structure
 
 - `src/main/` - Login and logout components
+- `src/management/` - User and unit management screens, `AclRowsEditor` and its `AclVO` adapter `AclEditor`
 - `src/models/` - Request, response, paging, sorting, and authentication types
 - `src/services/` - `AuthAPI`, `AbstractAPI`, and Axios unauthorized-response handling
 - `src/session/` - Session context, route verification, and expiration validation

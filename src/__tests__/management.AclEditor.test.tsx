@@ -6,7 +6,7 @@ import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {Form} from "antd";
 import {jest} from "@jest/globals";
 import type {AclVO, UnitVO, UserVO} from "../models";
-import {AclEditor} from "../management/AclEditor";
+import {ACL_PRIVILEGES, AclEditor, newAclRow, unitGranteeOptions, userGranteeOptions} from "../management/AclEditor";
 
 jest.mock("react-i18next", () => ({
     useTranslation: () => ({t: (_key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? _key})
@@ -40,7 +40,7 @@ if (typeof globalThis.MessageChannel === "undefined") {
     Object.defineProperty(globalThis, "MessageChannel", {writable: true, value: StubMessageChannel});
 }
 
-const users = [{id: 7, name: "Seven", login_name: "seven"}] as UserVO[];
+const users = [{id: 7, name: "Seven", nick: "seven", login_name: "seven"}] as UserVO[];
 const units = [{id: 3, name: "Unit three"}] as UnitVO[];
 
 function row(overrides: Partial<AclVO> = {}): AclVO {
@@ -144,14 +144,36 @@ describe("AclEditor", () => {
         const [, , modify, del] = screen.getAllByRole("switch");
 
         fireEvent.click(del);
-        await screen.findByText("Delete privilege requires modify privilege.");
+        // The message is shown under the modify and the delete switch
+        await screen.findAllByText("Delete privilege requires modify privilege.");
         fireEvent.click(screen.getByText("submit"));
         expect(onValues).not.toHaveBeenCalled();
 
         fireEvent.click(modify);
-        await waitFor(() => expect(screen.queryByText("Delete privilege requires modify privilege.")).toBeNull());
+        await waitFor(() => expect(screen.queryAllByText("Delete privilege requires modify privilege.")).toHaveLength(0));
         fireEvent.click(screen.getByText("submit"));
         await waitFor(() => expect(onValues).toHaveBeenCalledTimes(1));
         expect(onValues.mock.calls[0][0] as { acls: AclVO[] }).toMatchObject({acls: [{modify_privilege: true, delete_privilege: true}]});
+    });
+});
+
+describe("AclEditor adapter", () => {
+    it("maps users and units to grantee options and starts a new row with read granted", () => {
+        expect(userGranteeOptions([{id: 5, name: "Five", nick: "5", login_name: "five"} as UserVO, {id: 6, name: "", nick: "six", login_name: "six"} as UserVO]))
+                .toEqual([{value: 5, label: "Five (5)"}, {value: 6, label: "six"}]);
+        expect(unitGranteeOptions([{id: 6, name: "Six"} as UnitVO])).toEqual([{value: 6, label: "Six"}]);
+        expect(newAclRow()).toEqual({
+            permission_id: 0, acl_id: 0, user: null, unit: null, create_privilege: false, read_privilege: true, modify_privilege: false, delete_privilege: false
+        });
+        expect(ACL_PRIVILEGES).toEqual(["create_privilege", "read_privilege", "modify_privilege", "delete_privilege"]);
+    });
+
+    it("keeps the persisted ids of a row and sends them back with the privileges", async () => {
+        const onValues = jest.fn();
+        render(<Host acls={[row({permission_id: 42, acl_id: 9, read_privilege: true})]} onValues={onValues}/>);
+        fireEvent.click(await screen.findByText("submit"));
+
+        await waitFor(() => expect(onValues).toHaveBeenCalledTimes(1));
+        expect((onValues.mock.calls[0][0] as { acls: AclVO[] }).acls[0]).toMatchObject({permission_id: 42, acl_id: 9, user: 7, unit: null, read_privilege: true});
     });
 });
