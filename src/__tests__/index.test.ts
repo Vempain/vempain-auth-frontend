@@ -43,7 +43,8 @@ describe("library entry point", () => {
 
     it("re-exports the management screens and helpers", () => {
         expect(exportedNames(management)).toEqual(expect.arrayContaining([
-            "AclEditor", "ACL_PRIVILEGES", "UserList", "UserEditor", "AuditLine", "PRIVACY_TYPES", "UnitList", "UnitEditor",
+            "AclRowsEditor", "ACL_ROW_PRIVILEGES", "ACL_ROW_TRANSLATION_DEFAULTS", "defaultAclRow", "AclEditor", "ACL_PRIVILEGES",
+            "userGranteeOptions", "unitGranteeOptions", "newAclRow", "UserList", "UserEditor", "AuditLine", "PRIVACY_TYPES", "UnitList", "UnitEditor",
             "loadUsersAndUnits", "fullAclFor", "completeAcls", "MANAGEMENT_LOOKUP_PAGE_SIZE"
         ]));
         expect(management.PRIVACY_TYPES).toEqual(["PRIVATE", "GROUP", "PUBLIC"]);

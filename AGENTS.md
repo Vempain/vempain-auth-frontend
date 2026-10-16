@@ -13,7 +13,7 @@
 | Path              | Purpose                                                                                                                                                   |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `src/main/`       | `Login`, `Logout`, `VempainTable`, `usePagedTable`                                                                                                        |
-| `src/management/` | `UserList`, `UserEditor`, `UnitList`, `UnitEditor`, `AclEditor`, `loadUsersAndUnits` — the user/unit management screens shared by the admin and file SPAs |
+| `src/management/` | `UserList`, `UserEditor`, `UnitList`, `UnitEditor`, `loadUsersAndUnits` — the user/unit management screens shared by the admin and file SPAs; `AclRowsEditor` (the ACL row editor every Vempain frontend uses) and `AclEditor` (its `AclVO` adapter) |
 | `src/models/`     | `Requests/` (`LoginRequest`, `PagedRequest`), `Responses/` (`LoginResponse`, `PagedResponse`, `AclVO`, ...), `*Enum.ts` as `as const` objects             |
 | `src/services/`   | `AbstractAPI` (bearer-token Axios client with `findPageable`), `AuthAPI`, `UserAPI`, `UnitAPI`, `AclAPI`, `AuthInterceptor` (401/403 handling)            |
 | `src/session/`    | `SessionProvider`, `AuthVerify`, `sessionExpiration`                                                                                                      |
@@ -38,12 +38,29 @@
 - Units nest: `UnitVO.unit_ids` are the direct sub-units and `UnitVO.user_ids` the direct member users; `UserVO.unit_ids` the units a
   user is a direct member of. `UnitEditor` offers as member units only `selectableMemberUnits()` (never the unit itself nor a unit
   containing it) and `wouldCreateUnitCycle()` rejects a circular choice on submit; the backend repeats the check and answers 400.
-- `AclEditor` (`acls` Form.List of the host form, `users`/`units` passed in) carries the shared rules: either a user or a unit per row,
-  read required, delete requires modify, create implies read, and the "All" button left of the switches grants every privilege of its
-  row. The host editors (page, form, layout, component, gallery, user, unit) reuse it instead of local copies.
+- `AclRowsEditor` (`src/management/AclRowsEditor.tsx`) is the one ACL row editor of all Vempain frontends: it owns one `Form.List`
+  (`fieldName`, `acls` by default) of the host form, takes the grantees as `{value, label}` options (`users`, optional `units`; without
+  `units` it is a user-only editor) and knows nothing about requests or APIs. The row field names are configurable (`userField`/`unitField`,
+  `user`/`unit` by default, `user_id`/`unit_id` in the publish requests of the file SPA), `hiddenFields` carries ids such as
+  `permission_id`/`acl_id` along, `newRow` builds the row of the add button, `uniqueGrantees` offers every grantee in one row only and
+  disables the add button when all are used, `rowTestId` names the rows (`acl-row`). Rules, identical everywhere: a row names either a
+  user or a unit (a user when there is no unit column), read is required, delete requires modify, switching create on also switches read
+  on, and the "All" button left of the switches grants every privilege of its row. Texts use the `AclRow.*` keys with English defaults in
+  `ACL_ROW_TRANSLATION_DEFAULTS`. It lives here on purpose: this library is the home of all shared ACL functionality of the Vempain
+  frontends (`AclVO`, `PrivilegeEnum`, `AclTool`, `AclAPI`, the ACL rows of the user and unit editors), and `vempain-common-frontend` depends
+  on this one (`TaskAPI extends AbstractAPI`), so the dependency can only go this way. Every future shared ACL component, rule, model or
+  helper is added here and consumed by the SPAs and the other libraries; never add one to `vempain-common-frontend` or an SPA, and never
+  keep a second copy anywhere.
+- `AclEditor` (`acls`, `parentForm`, `users: UserVO[]`, `units: UnitVO[]`) is the adapter of `AclRowsEditor` for rows in the persisted
+  `AclVO` shape: `userGranteeOptions()`/`unitGranteeOptions()` map the backend's users ("name (nick)") and units to options,
+  `permission_id`/`acl_id` ride along hidden and `newAclRow()` starts a new row with read granted. The user and unit editors here and the
+  content editors of the admin SPA (page, form, layout, component, gallery through `AclEdit`) mount it; the file SPA's publish dialogs
+  mount `AclRowsEditor` directly with `user_id`/`unit_id` rows. `ACL_PRIVILEGES`/`AclPrivilege` are kept as aliases of
+  `ACL_ROW_PRIVILEGES`/`AclRowPrivilege`.
 - `UserEditor`/`UnitEditor` take `userId`/`unitId` (0 = create), `currentUserId` (a new entity starts with an ACL row granting that user
   everything), `onSaved`, optional `onCancel` and `renderMetadata` (the admin SPA plugs its `MetadataForm` in). Tests:
-  `management.AclEditor.test.tsx`, `management.UnitEditor.test.tsx`, `tools-unitTools.test.ts`, `services-management.test.ts`.
+  `management.AclRowsEditor.test.tsx` (the row rules), `management.AclEditor.test.tsx` (the `AclVO` adapter), `management.UnitEditor.test.tsx`,
+  `tools-unitTools.test.ts`, `services-management.test.ts`.
 
 ## Conventions
 

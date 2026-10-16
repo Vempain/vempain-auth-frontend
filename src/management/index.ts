@@ -1,4 +1,6 @@
-export {AclEditor, ACL_PRIVILEGES} from './AclEditor';
+export {AclRowsEditor, ACL_ROW_PRIVILEGES, ACL_ROW_TRANSLATION_DEFAULTS, defaultAclRow} from './AclRowsEditor';
+export type {AclGranteeOption, AclRowPrivilege, AclRowPrivileges, AclRowValues, AclRowsEditorProps} from './AclRowsEditor';
+export {AclEditor, ACL_PRIVILEGES, userGranteeOptions, unitGranteeOptions, newAclRow} from './AclEditor';
 export type {AclEditorProps, AclPrivilege} from './AclEditor';
 export {UserList} from './UserList';
 export type {UserListProps} from './UserList';
