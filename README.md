@@ -88,6 +88,16 @@ registered
 by `SessionProvider`. Repeated unauthorized responses are debounced for two seconds. If no callback is registered, the interceptor falls back to redirecting to
 `/login`, or to the path configured with `setLoginPath()`.
 
+## Trace propagation
+
+Every `AbstractAPI` instance also installs an Axios request interceptor that adds a W3C `traceparent` header (`00-<trace id>-<span id>-01`) to each request: one
+trace id per page load of the application (`currentTraceId()`,
+logged once at `console.debug` level as `[vempain] page trace id ...`) and a fresh span id per request (`nextTraceparent()`). Traefik and the backends continue
+that trace, so the API calls of one page view can be followed
+end to end in Grafana. A request that already carries a `traceparent` keeps it. The backend CORS configuration must
+allow the `traceparent` request header (the auth library's `WebSecurityConfig` allows every header); the admin and file
+applications get the behaviour by bumping this dependency.
+
 ## Extending `AbstractAPI`
 
 `AbstractAPI` has a public constructor so applications can create typed API services. It automatically adds the bearer token from the current persisted session
@@ -130,6 +140,7 @@ pushes to `main`, and version tags.
 - `src/management/` - User and unit management screens, `AclRowsEditor` and its `AclVO` adapter `AclEditor`
 - `src/models/` - Request, response, paging, sorting, and authentication types
 - `src/services/` - `AuthAPI`, `AbstractAPI`, and Axios unauthorized-response handling
+- `src/tools/traceparent.ts` - W3C trace context of the page (`currentTraceId`, `nextTraceparent`, `createTraceContext`)
 - `src/session/` - Session context, route verification, and expiration validation
 - `src/tools/` - ACL and validation helpers
 

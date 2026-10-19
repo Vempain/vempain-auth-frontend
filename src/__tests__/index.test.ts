@@ -77,8 +77,9 @@ describe("library entry point", () => {
 
     it("re-exports the tools", () => {
         expect(exportedNames(tools)).toEqual([
-            "UserName", "aclTool", "clearUserNameCache", "collectDescendantUnitIds", "resolveUserName", "selectableMemberUnits",
-            "validateParamId", "wouldCreateUnitCycle"
+            "TRACEPARENT_PATTERN", "UserName", "aclTool", "clearUserNameCache", "collectDescendantUnitIds", "createTraceContext",
+            "currentTraceId", "nextTraceparent", "randomHexId", "resolveUserName", "selectableMemberUnits", "validateParamId",
+            "wouldCreateUnitCycle"
         ]);
         expect(tools.validateParamId("42")).toBe(42);
     });

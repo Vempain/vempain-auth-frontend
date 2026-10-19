@@ -15,7 +15,7 @@ const axiosInstance = {
     post: jest.fn<Call>(),
     put: jest.fn<Call>(),
     delete: jest.fn<Call>(),
-    interceptors: {response: {use: jest.fn(), eject: jest.fn()}}
+    interceptors: {request: {use: jest.fn(), eject: jest.fn()}, response: {use: jest.fn(), eject: jest.fn()}}
 };
 
 jest.mock("axios", () => ({

@@ -9,7 +9,7 @@ import {VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 const axiosInstance = {
     defaults: {headers: {common: {}, get: {}, post: {}, put: {}, delete: {}}},
     post: jest.fn<(...args: unknown[]) => Promise<{ status: number; data: unknown }>>(),
-    interceptors: {response: {use: jest.fn(), eject: jest.fn()}}
+    interceptors: {request: {use: jest.fn(), eject: jest.fn()}, response: {use: jest.fn(), eject: jest.fn()}}
 };
 const create = jest.fn(() => axiosInstance);
 
