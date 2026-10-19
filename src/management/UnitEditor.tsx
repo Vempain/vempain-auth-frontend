@@ -80,17 +80,14 @@ export function UnitEditor({unitAPI, userAPI, unitId, currentUserId, onSaved, on
 
     const memberUnitOptions = selectableMemberUnits(unitId, units).map(candidate => ({value: candidate.id, label: candidate.name}));
 
-    function validateMemberUnits(_rule: unknown, value: number[] | undefined): Promise<void> {
-        if (unitId > 0 && value && wouldCreateUnitCycle(unitId, value, units)) {
-            return Promise.reject(new Error(t("UnitEditor.validation.cycle", {
-                defaultValue: "A unit can not contain itself, directly or through other units"
-            })));
-        }
-        return Promise.resolve();
-    }
-
     function onFinish(values: UnitVO) {
         if (unit === null) return;
+        if (unitId > 0 && values.unit_ids && wouldCreateUnitCycle(unitId, values.unit_ids, units)) {
+            setError(t("UnitEditor.validation.cycle", {
+                defaultValue: "A unit can not contain itself, directly or through other units"
+            }));
+            return;
+        }
         const payload: UnitVO = {
             ...unit,
             ...values,
@@ -140,7 +137,6 @@ export function UnitEditor({unitAPI, userAPI, unitId, currentUserId, onSaved, on
                                         }))}/>
                             </Form.Item>
                             <Form.Item name="unit_ids" label={t("UnitEditor.fields.units", {defaultValue: "Member units"})}
-                                       rules={[{validator: validateMemberUnits}]}
                                        extra={t("UnitEditor.hints.units", {
                                            defaultValue: "Units that contain this unit are not offered, because a unit can never contain itself"
                                        })}>

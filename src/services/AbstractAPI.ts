@@ -1,6 +1,9 @@
 import Axios, {type AxiosInstance} from "axios";
 import {type LoginResponse, type PagedRequest, type PagedResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {setupAuthInterceptor} from "./AuthInterceptor";
+import {nextTraceparent} from "../tools/traceparent";
+
+const TRACEPARENT_HEADER = "traceparent";
 
 export abstract class AbstractAPI<REQUEST, RESPONSE> {
     protected axiosInstance: AxiosInstance;
@@ -12,6 +15,22 @@ export abstract class AbstractAPI<REQUEST, RESPONSE> {
 
         // Set up the auth interceptor to handle 401 responses
         setupAuthInterceptor(this.axiosInstance);
+        // Every request carries the W3C trace context of this page load (one trace id per page, a new span id per request),
+        // which Traefik and the backends continue; a caller that set its own traceparent keeps it
+        this.axiosInstance.interceptors.request.use(config => {
+            const headers = (config.headers ?? {}) as Record<string, unknown> & { set?: (name: string, value: string, rewrite?: boolean) => unknown };
+
+            if (!hasHeader(headers, TRACEPARENT_HEADER)) {
+                if (typeof headers.set === "function") {
+                    headers.set(TRACEPARENT_HEADER, nextTraceparent(), false);
+                } else {
+                    headers[TRACEPARENT_HEADER] = nextTraceparent();
+                }
+                config.headers = headers as typeof config.headers;
+            }
+
+            return config;
+        });
     }
 
     public async findAll(params?: Record<string, unknown>): Promise<RESPONSE[]> {
@@ -76,4 +95,8 @@ export abstract class AbstractAPI<REQUEST, RESPONSE> {
             this.axiosInstance.defaults.headers.common['Authorization'] = 'Bearer ' + session.token;
         }
     }
+}
+
+function hasHeader(headers: Record<string, unknown>, name: string): boolean {
+    return Object.keys(headers).some(key => key.toLowerCase() === name);
 }

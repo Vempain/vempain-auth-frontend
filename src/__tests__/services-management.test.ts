@@ -11,7 +11,7 @@ const axiosInstance = {
     post: jest.fn<(...args: unknown[]) => Promise<{ data: unknown }>>(),
     put: jest.fn<(...args: unknown[]) => Promise<{ data: unknown }>>(),
     delete: jest.fn<(...args: unknown[]) => Promise<{ data: unknown }>>(),
-    interceptors: {response: {use: jest.fn(), eject: jest.fn()}}
+    interceptors: {request: {use: jest.fn(), eject: jest.fn()}, response: {use: jest.fn(), eject: jest.fn()}}
 };
 
 jest.mock("axios", () => ({

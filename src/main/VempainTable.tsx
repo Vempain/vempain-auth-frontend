@@ -394,6 +394,7 @@ function enhanceColumn<RecordType>(
                 <Select
                         allowClear
                         autoFocus
+                        defaultOpen
                         placeholder={t("common.table.filter.select")}
                         aria-label={t("common.table.filter.searchColumn", {column: name})}
                         value={selectedKeys[0]}

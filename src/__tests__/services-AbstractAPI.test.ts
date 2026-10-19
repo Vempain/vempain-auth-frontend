@@ -13,7 +13,7 @@ const axiosInstance = {
     post: jest.fn<Call>(),
     put: jest.fn<Call>(),
     delete: jest.fn<Call>(),
-    interceptors: {response: {use: jest.fn(), eject: jest.fn()}}
+    interceptors: {request: {use: jest.fn(), eject: jest.fn()}, response: {use: jest.fn(), eject: jest.fn()}}
 };
 const create = jest.fn(() => axiosInstance);
 
@@ -45,7 +45,36 @@ describe("AbstractAPI", () => {
             method.mockReset();
         }
         axiosInstance.interceptors.response.use.mockClear();
+        axiosInstance.interceptors.request.use.mockClear();
         create.mockClear();
+    });
+
+    it("adds the W3C traceparent of the page to every request and keeps one a caller set", async () => {
+        await itemAPI();
+
+        expect(axiosInstance.interceptors.request.use).toHaveBeenCalledTimes(1);
+        const [onRequest] = axiosInstance.interceptors.request.use.mock.calls[0] as [(config: { headers?: unknown }) => { headers: Record<string, string> }];
+        const pattern = /^00-([0-9a-f]{32})-([0-9a-f]{16})-01$/;
+
+        const plain = onRequest({headers: {Accept: "application/json"}});
+        const again = onRequest({headers: {}});
+        expect(plain.headers["traceparent"]).toMatch(pattern);
+        expect(again.headers["traceparent"]).toMatch(pattern);
+        expect(plain.headers["traceparent"].split("-")[1]).toBe(again.headers["traceparent"].split("-")[1]);
+        expect(plain.headers["traceparent"].split("-")[2]).not.toBe(again.headers["traceparent"].split("-")[2]);
+        expect(plain.headers["Accept"]).toBe("application/json");
+
+        const explicit = onRequest({headers: {Traceparent: "00-11111111111111111111111111111111-2222222222222222-01"}});
+        expect(explicit.headers["Traceparent"]).toBe("00-11111111111111111111111111111111-2222222222222222-01");
+        expect(explicit.headers["traceparent"]).toBeUndefined();
+
+        const set = jest.fn();
+        const axiosHeaders = onRequest({headers: {set}});
+        expect(set).toHaveBeenCalledWith("traceparent", expect.stringMatching(pattern), false);
+        expect(axiosHeaders.headers).toBeDefined();
+
+        const missing = onRequest({});
+        expect(missing.headers["traceparent"]).toMatch(pattern);
     });
 
     it("creates the client at <base><member> and installs the unauthorized interceptor", async () => {

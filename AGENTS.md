@@ -24,6 +24,10 @@
 
 - `SessionProvider` persists `LoginResponse` under the `vempainUser` local-storage key and validates `expires_at` through `isSessionExpired()` before
   restoring a session; `AuthVerify` repeats that check on route changes.
+- Every `AbstractAPI` instance installs a request interceptor that sets the W3C `traceparent` header from `src/tools/traceparent.ts`
+  (one trace id per page load, generated with Web Crypto, a new span id per request; an explicit `traceparent` of a caller wins).
+  Traefik and the backends continue the trace; the website frontend keeps its own copy of the tool (documented exception). Tests
+  that mock the Axios instance must provide `interceptors.request.use` as well as `interceptors.response.use`.
 - Every `AbstractAPI` instance installs the unauthorized interceptor: a `401`/`403` clears the session and calls the callback registered by
   `SessionProvider` (debounced two seconds), falling back to `/login` or `setLoginPath()`.
 - `findPageable()` posts a `PagedRequest` to `<base>/paged`; all JSON is snake_case (`sort_by`, `total_pages`, `total_elements`, ...).
