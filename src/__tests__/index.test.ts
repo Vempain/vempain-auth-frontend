@@ -53,7 +53,8 @@ describe("library entry point", () => {
 
     it("re-exports the models as const objects and the storage key", () => {
         expect(exportedNames(models)).toEqual(expect.arrayContaining([
-            "ActionResult", "ActionResultEnum", "PrivilegeEnum", "SortDirectionEnum", "VEMPAIN_LOCAL_STORAGE_KEY"
+            "ActionResult", "ActionResultEnum", "BACKGROUND_REQUEST_HEADER", "PrivilegeEnum", "RENEWED_TOKEN_EXPIRES_AT_HEADER", "RENEWED_TOKEN_HEADER",
+            "SortDirectionEnum", "VEMPAIN_LOCAL_STORAGE_KEY"
         ]));
         expect(models.VEMPAIN_LOCAL_STORAGE_KEY).toBe("vempainUser");
         expect(models.ActionResult).toEqual({OK: "OK", FAIL: "FAIL", NO_CHANGE: "NO_CHANGE"});
@@ -64,8 +65,9 @@ describe("library entry point", () => {
 
     it("re-exports the API clients and the interceptor functions", () => {
         expect(exportedNames(services)).toEqual([
-            "AbstractAPI", "AclAPI", "AuthAPI", "UnitAPI", "UserAPI", "clearOnUnauthorizedCallback", "removeAuthInterceptor",
-            "resetUnauthorizedHandling", "setLoginPath", "setOnUnauthorizedCallback", "setupAuthInterceptor"
+            "AbstractAPI", "AclAPI", "AuthAPI", "UnitAPI", "UserAPI", "adoptRenewedSession", "clearOnSessionRenewedCallback",
+            "clearOnUnauthorizedCallback", "removeAuthInterceptor", "resetUnauthorizedHandling", "setLoginPath", "setOnSessionRenewedCallback",
+            "setOnUnauthorizedCallback", "setupAuthInterceptor"
         ]);
         expect(typeof services.AuthAPI).toBe("function");
         expect(typeof services.setupAuthInterceptor).toBe("function");

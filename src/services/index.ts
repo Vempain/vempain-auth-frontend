@@ -6,6 +6,9 @@ export {AclAPI} from './AclAPI';
 export {
     setOnUnauthorizedCallback,
     clearOnUnauthorizedCallback,
+    setOnSessionRenewedCallback,
+    clearOnSessionRenewedCallback,
+    adoptRenewedSession,
     resetUnauthorizedHandling,
     setLoginPath,
     setupAuthInterceptor,

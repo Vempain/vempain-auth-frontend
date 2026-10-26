@@ -28,8 +28,14 @@
   (one trace id per page load, generated with Web Crypto, a new span id per request; an explicit `traceparent` of a caller wins).
   Traefik and the backends continue the trace; the website frontend keeps its own copy of the tool (documented exception). Tests
   that mock the Axios instance must provide `interceptors.request.use` as well as `interceptors.response.use`.
-- Every `AbstractAPI` instance installs the unauthorized interceptor: a `401`/`403` clears the session and calls the callback registered by
-  `SessionProvider` (debounced two seconds), falling back to `/login` or `setLoginPath()`.
+- Every `AbstractAPI` instance installs the unauthorized interceptor: a `401` clears the session and calls the callback registered by
+  `SessionProvider` (debounced two seconds), falling back to `/login` or `setLoginPath()`; a `403` keeps the session.
+- Sessions slide: the backends answer every request the user triggered with a renewed token in the `X-Vempain-Token` and
+  `X-Vempain-Token-Expires-At` response headers (`RENEWED_TOKEN_HEADER`, `RENEWED_TOKEN_EXPIRES_AT_HEADER` in `src/models/VempainConstants.ts`).
+  The same interceptor stores them in the persisted session (`adoptRenewedSession`, on successful and on non-401 error responses) and calls
+  the callback `SessionProvider` registers with `setOnSessionRenewedCallback`, so `userSession.expires_at` and the `AuthVerify` check follow
+  the user's last action. Requests that are not user actions (the task polling of `vempain-common-frontend`) send
+  `BACKGROUND_REQUEST_HEADER` (`X-Vempain-Background: true`) and are not renewed; use that header for any new automatic refresh.
 - `findPageable()` posts a `PagedRequest` to `<base>/paged`; all JSON is snake_case (`sort_by`, `total_pages`, `total_elements`, ...).
 - Peer dependencies (React 19, React Router 7, Axios 1.x) are provided by the host; Ant Design and Day.js are library dependencies.
 
