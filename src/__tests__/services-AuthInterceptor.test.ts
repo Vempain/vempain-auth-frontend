@@ -4,12 +4,15 @@
 
 import {jest} from "@jest/globals";
 import type {AxiosError, AxiosInstance} from "axios";
-import {VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {RENEWED_TOKEN_EXPIRES_AT_HEADER, RENEWED_TOKEN_HEADER, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
 import {
+    adoptRenewedSession,
+    clearOnSessionRenewedCallback,
     clearOnUnauthorizedCallback,
     removeAuthInterceptor,
     resetUnauthorizedHandling,
     setLoginPath,
+    setOnSessionRenewedCallback,
     setOnUnauthorizedCallback,
     setupAuthInterceptor
 } from "../services/AuthInterceptor";
@@ -39,6 +42,7 @@ describe("AuthInterceptor", () => {
         localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify({token: "jwt", id: 1}));
         resetUnauthorizedHandling();
         clearOnUnauthorizedCallback();
+        clearOnSessionRenewedCallback();
         setLoginPath("/login");
         errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
         warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
@@ -57,6 +61,63 @@ describe("AuthInterceptor", () => {
 
         expect(id).toBe(42);
         expect(onFulfilled(response)).toBe(response);
+    });
+
+    it("stores a renewed token from a successful response and tells the registered callback", () => {
+        const renewed = jest.fn();
+        setOnSessionRenewedCallback(renewed);
+        const {onFulfilled} = fakeAxios();
+        const response = {status: 200, data: "ok", headers: {"x-vempain-token": "jwt-2", "x-vempain-token-expires-at": "2099-01-01T00:10:00Z"}};
+
+        expect(onFulfilled(response)).toBe(response);
+
+        const stored = JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}");
+        expect(stored).toEqual({token: "jwt-2", id: 1, expires_at: "2099-01-01T00:10:00Z"});
+        expect(renewed).toHaveBeenCalledWith({token: "jwt-2", id: 1, expires_at: "2099-01-01T00:10:00Z"});
+    });
+
+    it("stores a renewed token from an error response that is not a 401", async () => {
+        const renewed = jest.fn();
+        setOnSessionRenewedCallback(renewed);
+        const {onRejected} = fakeAxios();
+        const headers = new Map([[RENEWED_TOKEN_HEADER, "jwt-3"], [RENEWED_TOKEN_EXPIRES_AT_HEADER, "2099-01-01T00:20:00Z"]]);
+        const rejection = {response: {status: 404, headers: {get: (name: string) => headers.get(name)}}} as unknown as AxiosError;
+
+        await expect(onRejected(rejection)).rejects.toBe(rejection);
+
+        expect(JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}").token).toBe("jwt-3");
+        expect(renewed).toHaveBeenCalledTimes(1);
+    });
+
+    it("ignores responses without a renewed token, the same token again, and renewals while nothing is stored", () => {
+        const renewed = jest.fn();
+        setOnSessionRenewedCallback(renewed);
+
+        adoptRenewedSession(undefined);
+        adoptRenewedSession({"content-type": "application/json"});
+        adoptRenewedSession({"x-vempain-token": "jwt"});
+        expect(JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}")).toEqual({token: "jwt", id: 1});
+
+        localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
+        adoptRenewedSession({"x-vempain-token": "jwt-4"});
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+
+        localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, "not json");
+        adoptRenewedSession({"x-vempain-token": "jwt-4"});
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBe("not json");
+        expect(renewed).not.toHaveBeenCalled();
+    });
+
+    it("keeps the stored expiry when the renewal carries none and survives a failing callback", () => {
+        localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify({token: "jwt", id: 1, expires_at: "2099-01-01T00:00:00Z"}));
+        setOnSessionRenewedCallback(() => {
+            throw new Error("boom");
+        });
+
+        adoptRenewedSession({"X-Vempain-Token": "jwt-5"});
+
+        expect(JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}")).toEqual({token: "jwt-5", id: 1, expires_at: "2099-01-01T00:00:00Z"});
+        expect(errorSpy).toHaveBeenCalled();
     });
 
     it("clears the session and calls the registered callback on a 401", async () => {

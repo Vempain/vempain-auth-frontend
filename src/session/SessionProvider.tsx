@@ -1,7 +1,15 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useMemo, useState} from "react";
 import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
-import {AuthAPI, clearOnUnauthorizedCallback, resetUnauthorizedHandling, setLoginPath, setOnUnauthorizedCallback} from "../services";
+import {
+    AuthAPI,
+    clearOnSessionRenewedCallback,
+    clearOnUnauthorizedCallback,
+    resetUnauthorizedHandling,
+    setLoginPath,
+    setOnSessionRenewedCallback,
+    setOnUnauthorizedCallback
+} from "../services";
 import {isSessionExpired} from "./sessionExpiration";
 
 const LANGUAGE_STORAGE_KEY = "language";
@@ -83,9 +91,16 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
             window.location.href = loginPath;
         });
 
+        // The backends renew the session on every request the user triggers (sliding session); the interceptor stores the
+        // renewed token and tells us, so the expiry the route guard checks is the one counted from the last action
+        setOnSessionRenewedCallback(renewed => {
+            setUser(renewed);
+        });
+
         // Cleanup on unmount
         return () => {
             clearOnUnauthorizedCallback();
+            clearOnSessionRenewedCallback();
         };
     }, [loginPath, authAPI]);
 

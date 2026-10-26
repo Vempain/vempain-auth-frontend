@@ -46,6 +46,7 @@ function Consumer({useSession}: { useSession: SessionModule["useSession"] }) {
     return (
             <div>
                 <span data-testid="login">{userSession?.login ?? "anonymous"}</span>
+                <span data-testid="token">{userSession?.token ?? "none"}</span>
                 <span data-testid="language">{sessionLanguage}/{getSessionLanguage()}</span>
                 <button type="button" onClick={() => void loginUser({login: "seven", password: "secret"}).then(status => {
                     document.title = status.status + ":" + status.message;
@@ -181,6 +182,27 @@ describe("SessionProvider", () => {
         resetUnauthorizedHandling();
         await onRejected({response: {status: 401}}).catch(() => undefined);
         expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("No unauthorized callback registered"), "/signin");
+    });
+
+    it("adopts the renewed token a response carries so the session slides with the user's actions", async () => {
+        localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(storedSession));
+        const {SessionProvider, useSession, UserAPI} = await modules();
+
+        render(<SessionProvider baseURL="http://backend/api"><Consumer useSession={useSession}/></SessionProvider>);
+        expect(screen.getByTestId("token").textContent).toBe("jwt-token");
+
+        // Any AbstractAPI client installs the interceptor; a renewed token in a response reaches the provider
+        new UserAPI("http://backend/api", "/content-management/users");
+        const [onFulfilled] = axiosInstance.interceptors.response.use.mock.calls.at(-1) as [(response: unknown) => unknown, unknown];
+        await act(async () => {
+            onFulfilled({status: 200, data: [], headers: {"x-vempain-token": "jwt-token-2", "x-vempain-token-expires-at": "2099-06-01T00:00:00Z"}});
+        });
+
+        await waitFor(() => expect(screen.getByTestId("token").textContent).toBe("jwt-token-2"));
+        const stored = JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}") as LoginResponse;
+        expect(stored.token).toBe("jwt-token-2");
+        expect(String(stored.expires_at)).toBe("2099-06-01T00:00:00Z");
+        expect(stored.login).toBe("seven");
     });
 
     it("useSession throws outside of a provider", async () => {
