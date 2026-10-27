@@ -216,7 +216,7 @@ export function AclRowsEditor({
                                                            dependencies={hasUnits ? [[fieldName, field.name, unitField]] : undefined}
                                                            rules={[{validator: () => validateGrantee(field.name)}]}>
                                                     <Select placeholder={text("AclRow.placeholders.user")}
-                                                            showSearch optionFilterProp="label" allowClear
+                                                            showSearch={{optionFilterProp: "label"}} allowClear
                                                             options={optionsFor(field.name, userField, users)}/>
                                                 </Form.Item>
                                             </Col>
@@ -226,7 +226,7 @@ export function AclRowsEditor({
                                                                    dependencies={[[fieldName, field.name, userField]]}
                                                                    rules={[{validator: () => validateGrantee(field.name)}]}>
                                                             <Select placeholder={text("AclRow.placeholders.unit")}
-                                                                    showSearch optionFilterProp="label" allowClear
+                                                                    showSearch={{optionFilterProp: "label"}} allowClear
                                                                     options={optionsFor(field.name, unitField, units)}/>
                                                         </Form.Item>
                                                     </Col>

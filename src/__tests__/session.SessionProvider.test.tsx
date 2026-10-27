@@ -52,6 +52,10 @@ function Consumer({useSession}: { useSession: SessionModule["useSession"] }) {
                     document.title = status.status + ":" + status.message;
                 })}>login
                 </button>
+                <button type="button" onClick={() => void loginUser({login: "seven", password: "secret"}, false).then(status => {
+                    document.title = status.status + ":" + status.message;
+                })}>login for this window
+                </button>
                 <button type="button" onClick={() => logoutUser()}>logout</button>
                 <button type="button" onClick={() => setSessionLanguage("fi")}>finnish</button>
                 <button type="button" onClick={() => refreshUserSession({...storedSession, login: "refreshed"})}>refresh</button>
@@ -65,6 +69,7 @@ describe("SessionProvider", () => {
 
     beforeEach(() => {
         localStorage.clear();
+        sessionStorage.clear();
         document.title = "";
         axiosInstance.post.mockReset();
         axiosInstance.get.mockReset();
@@ -119,6 +124,35 @@ describe("SessionProvider", () => {
         await waitFor(() => expect(document.title).toBe("SUCCESS:Login successful"));
         expect(axiosInstance.post).toHaveBeenCalledWith("", {login: "seven", password: "secret"});
         expect(JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "null")).toEqual(storedSession);
+    });
+
+    it("keeps a login without Remember me in session storage, renews and refreshes it there and restores it on mount", async () => {
+        const {SessionProvider, useSession, adoptRenewedSession} = await modules();
+        axiosInstance.post.mockResolvedValue({status: 200, data: storedSession});
+
+        const first = render(<SessionProvider baseURL="http://backend/api"><Consumer useSession={useSession}/></SessionProvider>);
+        fireEvent.click(screen.getByText("login for this window"));
+
+        await waitFor(() => expect(screen.getByTestId("login").textContent).toBe("seven"));
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+        expect(JSON.parse(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "null")).toEqual(storedSession);
+
+        act(() => adoptRenewedSession({"X-Vempain-Token": "jwt-renewed"}));
+        await waitFor(() => expect(screen.getByTestId("token").textContent).toBe("jwt-renewed"));
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+
+        fireEvent.click(screen.getByText("refresh"));
+        expect(JSON.parse(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}").login).toBe("refreshed");
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+
+        // a new provider in the same window (a reload) restores the window-only session
+        first.unmount();
+        render(<SessionProvider baseURL="http://backend/api"><Consumer useSession={useSession}/></SessionProvider>);
+        expect(screen.getByTestId("login").textContent).toBe("refreshed");
+
+        fireEvent.click(screen.getByText("logout"));
+        expect(screen.getByTestId("login").textContent).toBe("anonymous");
+        expect(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
     });
 
     it("reports a failed login with the error message", async () => {

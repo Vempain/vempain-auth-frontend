@@ -46,13 +46,18 @@ export default tseslint.config(
                 warnOnUnsupportedTypeScriptVersion: false,
                 ecmaFeatures: {
                     jsx: true
-                }
+                },
+                // Type information for the type-aware rules below
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname
             },
             globals: browserGlobals
         },
         rules: {
             ...reactHooks.configs.recommended.rules,
-            "no-console": "off"
+            "no-console": "off",
+            // Deprecated 3rd-party functionality (anything its type declarations mark @deprecated: Ant Design props, DOM and library APIs) fails the lint
+            "@typescript-eslint/no-deprecated": "error"
         }
     }
 );

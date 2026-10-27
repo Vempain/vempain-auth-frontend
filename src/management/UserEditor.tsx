@@ -163,7 +163,7 @@ export function UserEditor({userAPI, unitAPI, userId, currentUserId, onSaved, on
                                 <Input.TextArea rows={2}/>
                             </Form.Item>
                             <Form.Item name="unit_ids" label={t("UserEditor.fields.units", {defaultValue: "Member of units"})}>
-                                <Select mode="multiple" allowClear showSearch optionFilterProp="label"
+                                <Select mode="multiple" allowClear showSearch={{optionFilterProp: "label"}}
                                         placeholder={t("UserEditor.placeholders.units", {defaultValue: "Select units"})}
                                         options={units.map(unit => ({value: unit.id, label: unit.name}))}/>
                             </Form.Item>

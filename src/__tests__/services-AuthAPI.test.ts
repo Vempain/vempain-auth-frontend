@@ -33,6 +33,7 @@ describe("AuthAPI", () => {
 
     beforeEach(() => {
         localStorage.clear();
+        sessionStorage.clear();
         axiosInstance.post.mockReset();
         create.mockClear();
         errorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
@@ -54,6 +55,21 @@ describe("AuthAPI", () => {
         expect(result).toEqual(session);
         expect(JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "null")).toEqual(session);
         expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it("keeps the session in session storage when the user did not ask to be remembered, sending only the credentials", async () => {
+        const {AuthAPI} = await import("../services/AuthAPI");
+        const authAPI = new AuthAPI("http://backend/api");
+        axiosInstance.post.mockResolvedValue({status: 200, data: session});
+
+        await authAPI.login({login: "seven", password: "secret"}, false);
+
+        expect(axiosInstance.post).toHaveBeenCalledWith("", {login: "seven", password: "secret"});
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+        expect(JSON.parse(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "null")).toEqual(session);
+
+        authAPI.logout();
+        expect(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
     });
 
     it("does not store a session when the response carries no user id", async () => {

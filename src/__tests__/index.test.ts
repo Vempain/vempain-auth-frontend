@@ -73,8 +73,11 @@ describe("library entry point", () => {
         expect(typeof services.setupAuthInterceptor).toBe("function");
     });
 
-    it("re-exports the session provider, hook and verifier", () => {
-        expect(exportedNames(session)).toEqual(["AuthVerify", "SessionProvider", "isSessionExpired", "useSession"]);
+    it("re-exports the session provider, hook, verifier and the session store", () => {
+        expect(exportedNames(session)).toEqual([
+            "AuthVerify", "SessionProvider", "clearStoredSession", "isSessionExpired", "isStoredSessionRemembered", "readStoredSession",
+            "readStoredSessionText", "useSession", "writeStoredSession"
+        ]);
     });
 
     it("re-exports the tools", () => {

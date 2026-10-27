@@ -9,7 +9,7 @@ import type {LoginRequest, LoginStatus} from "../models";
 import {ActionResultEnum} from "../models";
 import {Login} from "../main/Login";
 
-const loginUser = jest.fn<(request: LoginRequest) => Promise<LoginStatus>>();
+const loginUser = jest.fn<(request: LoginRequest, remember?: boolean) => Promise<LoginStatus>>();
 
 jest.mock("../session", () => ({
     useSession: () => ({loginUser})
@@ -68,7 +68,22 @@ describe("Login", () => {
         await fillAndSubmit("seven", "secret");
 
         await screen.findByText("front page");
-        expect(loginUser).toHaveBeenCalledWith({login: "seven", password: "secret"});
+        // "Remember me" is ticked by default, so the session is kept across browser restarts
+        expect(loginUser).toHaveBeenCalledWith({login: "seven", password: "secret"}, true);
+    });
+
+    it("asks for a window-only session when Remember me is unticked", async () => {
+        loginUser.mockResolvedValue({status: ActionResultEnum.SUCCESS, message: "Login successful"});
+        render(<App/>);
+
+        const remember = screen.getByLabelText("Remember me") as HTMLInputElement;
+        expect(remember.checked).toBe(true);
+        fireEvent.click(remember);
+        expect(remember.checked).toBe(false);
+        await fillAndSubmit("seven", "secret");
+
+        await screen.findByText("front page");
+        expect(loginUser).toHaveBeenCalledWith({login: "seven", password: "secret"}, false);
     });
 
     it("shows the failure and returns to the front page on request", async () => {

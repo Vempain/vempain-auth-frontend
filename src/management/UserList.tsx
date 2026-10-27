@@ -42,7 +42,7 @@ export function UserList({userAPI, onEdit, onCreate}: UserListProps) {
     ];
 
     return (
-            <Space direction="vertical" style={{width: "100%"}} size="large">
+            <Space orientation="vertical" style={{width: "100%"}} size="large">
                 {paged.contextHolder}
                 <Space style={{justifyContent: "space-between", width: "100%"}}>
                     <h1>{t("UserList.title", {defaultValue: "Users"})}</h1>

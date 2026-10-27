@@ -53,6 +53,24 @@ describe("AuthInterceptor", () => {
         errorSpy.mockRestore();
         warnSpy.mockRestore();
         localStorage.clear();
+        sessionStorage.clear();
+    });
+
+    it("renews a window-only session in session storage and clears it on a 401", async () => {
+        localStorage.clear();
+        sessionStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify({token: "jwt", id: 1}));
+        const callback = jest.fn();
+        setOnUnauthorizedCallback(callback);
+        const {onFulfilled, onRejected} = fakeAxios();
+
+        onFulfilled({status: 200, headers: {"X-Vempain-Token": "jwt-window"}});
+        expect(JSON.parse(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) ?? "{}").token).toBe("jwt-window");
+        expect(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+
+        const rejection = error(401);
+        await expect(onRejected(rejection)).rejects.toBe(rejection);
+        expect(sessionStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY)).toBeNull();
+        expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it("passes successful responses through and returns the interceptor id", () => {

@@ -22,8 +22,13 @@
 
 ## Semantics to preserve
 
-- `SessionProvider` persists `LoginResponse` under the `vempainUser` local-storage key and validates `expires_at` through `isSessionExpired()` before
-  restoring a session; `AuthVerify` repeats that check on route changes.
+- `SessionProvider` persists `LoginResponse` under the `vempainUser` key and validates `expires_at` through `isSessionExpired()` before
+  restoring a session; `AuthVerify` repeats that check on route changes. The "Remember me" box of `Login` decides where the session lives
+  (`loginUser(request, remember)`, default `true`): in local storage, which survives closing the browser, or in session storage, which
+  the browser discards when the window closes and which a new tab does not share. `src/session/sessionStore.ts` is the only code that
+  touches either storage (`readStoredSession[Text]`, `writeStoredSession`, `clearStoredSession`, `isStoredSessionRemembered`); a
+  renewal or refresh writes without `remember` and keeps the storage the login chose, a login writes with it and clears the other
+  storage, a logout or 401 clears both. Never read or write the key directly, in this library or in a host.
 - Every `AbstractAPI` instance installs a request interceptor that sets the W3C `traceparent` header from `src/tools/traceparent.ts`
   (one trace id per page load, generated with Web Crypto, a new span id per request; an explicit `traceparent` of a caller wins).
   Traefik and the backends continue the trace; the website frontend keeps its own copy of the tool (documented exception). Tests
@@ -87,6 +92,9 @@ yarn lint
 yarn test
 yarn build
 ```
+
+`yarn lint` is type-aware (`parserOptions.projectService`) and fails on `@typescript-eslint/no-deprecated`: any use of functionality that the type declarations
+mark `@deprecated` (Ant Design props, DOM or library APIs) must be replaced by the documented successor. CI runs it before the build.
 
 Use the checked-in Yarn 4 release. CI uses the reusable `frontend-library.yaml` workflow from `vempain-workflows`, which sets the package version from
 `VERSION` and publishes to GitHub Packages on `main`. Do not commit `dist/`, `coverage/` or `node_modules/`.
