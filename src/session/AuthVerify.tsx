@@ -1,7 +1,8 @@
 import {useLocation} from "react-router-dom";
 import {useEffect} from "react";
-import {type LoginResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import type {LoginResponse} from "../models";
 import {isSessionExpired} from "./sessionExpiration";
+import {readStoredSessionText} from "./sessionStore";
 
 interface AuthVerifyProps {
     logOut: () => void;
@@ -11,7 +12,7 @@ export function AuthVerify({logOut}: AuthVerifyProps) {
     const location = useLocation();
 
     useEffect(() => {
-        const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
+        const userData = readStoredSessionText();
         if (!userData) {
             return;
         }

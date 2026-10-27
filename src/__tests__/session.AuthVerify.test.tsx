@@ -27,6 +27,19 @@ function store(expiresAt: string) {
 describe("AuthVerify", () => {
     beforeEach(() => {
         localStorage.clear();
+        sessionStorage.clear();
+    });
+
+    it("checks a window-only session kept in session storage as well", () => {
+        const logOut = jest.fn();
+        sessionStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify({token: "jwt", id: 1, expires_at: "2099-01-01T00:00:00Z"}));
+        const {unmount} = render(<App logOut={logOut}/>);
+        expect(logOut).not.toHaveBeenCalled();
+        unmount();
+
+        sessionStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify({token: "jwt", id: 1, expires_at: "2000-01-01T00:00:00Z"}));
+        render(<App logOut={logOut}/>);
+        expect(logOut).toHaveBeenCalledTimes(1);
     });
 
     it("does nothing without a stored session", () => {

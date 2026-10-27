@@ -1,5 +1,6 @@
 import Axios, {type AxiosInstance} from "axios";
-import {type LoginResponse, type PagedRequest, type PagedResponse, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import type {PagedRequest, PagedResponse} from "../models";
+import {readStoredSession} from "../session/sessionStore";
 import {setupAuthInterceptor} from "./AuthInterceptor";
 import {nextTraceparent} from "../tools/traceparent";
 
@@ -84,12 +85,12 @@ export abstract class AbstractAPI<REQUEST, RESPONSE> {
     }
 
     /**
-     * Sets the authorization header for the axios instance. We get the authorization bearer value from the local storage. We're forced
-     * to do this on every request because the token can expire at any time.
+     * Sets the authorization header for the axios instance from the persisted session (local or session storage, see sessionStore).
+     * We're forced to do this on every request because the token is renewed by the backend and can expire at any time.
      * @protected
      */
     protected setAuthorizationHeader(): void {
-        const session: LoginResponse = JSON.parse(localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY) || "{}");
+        const session = readStoredSession();
 
         if (session && session.token) {
             this.axiosInstance.defaults.headers.common['Authorization'] = 'Bearer ' + session.token;

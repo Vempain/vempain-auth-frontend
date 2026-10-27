@@ -39,6 +39,7 @@ async function itemAPI() {
 describe("AbstractAPI", () => {
     beforeEach(() => {
         localStorage.clear();
+        sessionStorage.clear();
         axiosInstance.defaults.headers.common = {};
         axiosInstance.defaults.headers.put = {};
         for (const method of [axiosInstance.get, axiosInstance.post, axiosInstance.put, axiosInstance.delete]) {
@@ -85,6 +86,16 @@ describe("AbstractAPI", () => {
         const [onFulfilled, onRejected] = axiosInstance.interceptors.response.use.mock.calls[0] as [(r: unknown) => unknown, (e: unknown) => Promise<never>];
         expect(onFulfilled({data: 1})).toEqual({data: 1});
         await expect(onRejected({response: {status: 500}})).rejects.toEqual({response: {status: 500}});
+    });
+
+    it("sends the bearer token of a window-only session kept in session storage", async () => {
+        const api = await itemAPI();
+        sessionStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify({token: "jwt-window", id: 1}));
+        axiosInstance.get.mockResolvedValue({status: 200, data: []});
+
+        await api.findAll();
+
+        expect(axiosInstance.defaults.headers.common["Authorization"]).toBe("Bearer jwt-window");
     });
 
     it("sends the bearer token of the stored session with every request", async () => {

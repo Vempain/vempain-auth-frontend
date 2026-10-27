@@ -129,7 +129,7 @@ export function UnitEditor({unitAPI, userAPI, unitId, currentUserId, onSaved, on
                                 <Input.TextArea rows={2}/>
                             </Form.Item>
                             <Form.Item name="user_ids" label={t("UnitEditor.fields.users", {defaultValue: "Member users"})}>
-                                <Select mode="multiple" allowClear showSearch optionFilterProp="label"
+                                <Select mode="multiple" allowClear showSearch={{optionFilterProp: "label"}}
                                         placeholder={t("UnitEditor.placeholders.users", {defaultValue: "Select users"})}
                                         options={users.map(user => ({
                                             value: user.id,
@@ -140,7 +140,7 @@ export function UnitEditor({unitAPI, userAPI, unitId, currentUserId, onSaved, on
                                        extra={t("UnitEditor.hints.units", {
                                            defaultValue: "Units that contain this unit are not offered, because a unit can never contain itself"
                                        })}>
-                                <Select mode="multiple" allowClear showSearch optionFilterProp="label"
+                                <Select mode="multiple" allowClear showSearch={{optionFilterProp: "label"}}
                                         placeholder={t("UnitEditor.placeholders.units", {defaultValue: "Select units"})}
                                         options={memberUnitOptions}/>
                             </Form.Item>

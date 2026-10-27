@@ -1,5 +1,6 @@
 import type {AxiosError, AxiosInstance, AxiosResponse} from "axios";
-import {type LoginResponse, RENEWED_TOKEN_EXPIRES_AT_HEADER, RENEWED_TOKEN_HEADER, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {type LoginResponse, RENEWED_TOKEN_EXPIRES_AT_HEADER, RENEWED_TOKEN_HEADER} from "../models";
+import {clearStoredSession, readStoredSessionText, writeStoredSession} from "../session/sessionStore";
 
 // Type for the unauthorized callback function
 type UnauthorizedCallback = () => void;
@@ -89,7 +90,7 @@ export function adoptRenewedSession(headers: unknown): void {
         return;
     }
 
-    const stored = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
+    const stored = readStoredSessionText();
     if (!stored) {
         return;
     }
@@ -107,7 +108,8 @@ export function adoptRenewedSession(headers: unknown): void {
 
     const expiresAt = headerValue(headers, RENEWED_TOKEN_EXPIRES_AT_HEADER);
     const renewed: LoginResponse = {...session, token, expires_at: (expiresAt ?? session.expires_at) as LoginResponse["expires_at"]};
-    localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(renewed));
+    // a renewal keeps the session where the login put it: remembered sessions stay remembered, window-only sessions stay window-only
+    writeStoredSession(renewed);
 
     if (onSessionRenewedCallback) {
         try {
@@ -151,8 +153,8 @@ function handleUnauthorized(): void {
 
     lastUnauthorizedHandledAt = now;
 
-    // Clear the session from local storage
-    localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
+    // Clear the persisted session, wherever the login put it
+    clearStoredSession();
 
     // Call the callback if set
     if (onUnauthorizedCallback) {

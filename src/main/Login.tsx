@@ -29,7 +29,8 @@ function Login() {
             password: password
         };
 
-        const loginStatus: LoginStatus = await loginUser(loginRequest);
+        // "Remember me" keeps the session across browser restarts; without it the session ends when the browser window closes
+        const loginStatus: LoginStatus = await loginUser(loginRequest, values.remember ?? false);
 
         if (!loginStatus || loginStatus.status === ActionResultEnum.FAILURE) {
             setLoginResults({status: ActionResult.FAIL, message: "Failed to log in user"});
@@ -61,7 +62,7 @@ function Login() {
 
     return (
             <div className={"DarkDiv"}>
-                <Spin tip={"Loading"} spinning={loading}>
+                <Spin description={"Loading"} spinning={loading}>
                     <Space
                             vertical={true}
                             style={{width: "100%", margin: 30}}

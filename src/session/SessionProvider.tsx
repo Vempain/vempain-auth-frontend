@@ -1,6 +1,6 @@
 import type {ReactNode} from "react";
 import {createContext, useContext, useEffect, useMemo, useState} from "react";
-import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus, VEMPAIN_LOCAL_STORAGE_KEY} from "../models";
+import {ActionResultEnum, type LoginRequest, type LoginResponse, type LoginStatus} from "../models";
 import {
     AuthAPI,
     clearOnSessionRenewedCallback,
@@ -11,11 +11,12 @@ import {
     setOnUnauthorizedCallback
 } from "../services";
 import {isSessionExpired} from "./sessionExpiration";
+import {clearStoredSession, readStoredSessionText, writeStoredSession} from "./sessionStore";
 
 const LANGUAGE_STORAGE_KEY = "language";
 
 export function getStoredSession(): LoginResponse | null {
-    const userData = localStorage.getItem(VEMPAIN_LOCAL_STORAGE_KEY);
+    const userData = readStoredSessionText();
 
     if (!userData) {
         return null;
@@ -24,13 +25,13 @@ export function getStoredSession(): LoginResponse | null {
     try {
         const session = JSON.parse(userData) as LoginResponse;
         if (isSessionExpired(session)) {
-            localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
+            clearStoredSession();
             return null;
         }
 
         return session;
     } catch {
-        localStorage.removeItem(VEMPAIN_LOCAL_STORAGE_KEY);
+        clearStoredSession();
         return null;
     }
 }
@@ -53,7 +54,11 @@ interface SessionContextType {
     sessionLanguage: string;
     getSessionLanguage: () => string;
     setSessionLanguage: (language: string) => void;
-    loginUser: (loginRequest: LoginRequest) => Promise<LoginStatus>;
+    /**
+     * Logs in and persists the session: with `remember` (the "Remember me" box of the login form, the default) across browser restarts
+     * in local storage, otherwise in session storage for this browser window only.
+     */
+    loginUser: (loginRequest: LoginRequest, remember?: boolean) => Promise<LoginStatus>;
     logoutUser: () => void;
     refreshUserSession: (loginVO: LoginResponse) => void;
 }
@@ -105,10 +110,10 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
     }, [loginPath, authAPI]);
 
     // Function to handle login
-    async function loginUser(loginRequest: LoginRequest): Promise<LoginStatus> {
+    async function loginUser(loginRequest: LoginRequest, remember: boolean = true): Promise<LoginStatus> {
         try {
-            const jwtResponse = await authAPI.login(loginRequest);
-            localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(jwtResponse));
+            const jwtResponse = await authAPI.login(loginRequest, remember);
+            writeStoredSession(jwtResponse, remember);
             setUser(jwtResponse);
             // Reset the unauthorized handling flag to allow future 401 responses to be handled
             resetUnauthorizedHandling();
@@ -140,7 +145,7 @@ export function SessionProvider({baseURL, children, loginPath = "/login"}: Sessi
     };
 
     function refreshUserSession(loginVO: LoginResponse): void {
-        localStorage.setItem(VEMPAIN_LOCAL_STORAGE_KEY, JSON.stringify(loginVO));
+        writeStoredSession(loginVO);
         setUser(loginVO);
     };
 

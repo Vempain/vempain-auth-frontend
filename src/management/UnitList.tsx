@@ -41,7 +41,7 @@ export function UnitList({unitAPI, onEdit, onCreate}: UnitListProps) {
     ];
 
     return (
-            <Space direction="vertical" style={{width: "100%"}} size="large">
+            <Space orientation="vertical" style={{width: "100%"}} size="large">
                 {paged.contextHolder}
                 <Space style={{justifyContent: "space-between", width: "100%"}}>
                     <h1>{t("UnitList.title", {defaultValue: "Units"})}</h1>
