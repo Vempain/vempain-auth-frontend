@@ -1,7 +1,8 @@
 export {Login} from './Login';
 export {Logout} from './Logout';
-export {VempainTable} from './VempainTable';
+export {DEFAULT_ACTION_COLUMN_WIDTH, DEFAULT_COLUMN_WIDTH, estimateColumnWidth, fitColumnsToWidth, VempainTable} from './VempainTable';
 export type {
+    VempainColumnExtras,
     VempainColumnGroupType,
     VempainColumnType,
     VempainColumnsType,

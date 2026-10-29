@@ -44,6 +44,14 @@
 - `findPageable()` posts a `PagedRequest` to `<base>/paged`; all JSON is snake_case (`sort_by`, `total_pages`, `total_elements`, ...).
 - Peer dependencies (React 19, React Router 7, Axios 1.x) are provided by the host; Ant Design and Day.js are library dependencies.
 
+- `VempainTable` never grows wider than the element it is rendered into: besides the breakpoint collapse (below `collapseBelow`, default
+  `md`, only `mobile` and action columns stay), on wide screens it measures its wrapper (`ResizeObserver`) and moves the columns that
+  do not fit into the expandable row, least important first (`fitColumnsToWidth`: columns without `priority` from the right, then
+  descending `priority`; the identifying and action columns are never dropped), switching to a fixed layout with every remaining column
+  at its estimated width (`estimateColumnWidth`: numeric `width`, else `minWidth`, else from the title). Screens rank their columns with
+  `priority` (1 = kept longest) and give action columns a `width`. An unmeasured container (0, jsdom) shows every column. Tests:
+  `src/__tests__/main.VempainTable.fit.test.tsx`.
+
 ## User and unit management
 
 - The admin and file backends keep separate user bases, but both host the same endpoints from `vempain-auth-core`
