@@ -16,11 +16,26 @@ import type {PagedTableState} from "./usePagedTable";
  * without the flag are moved into the expandable row on narrow screens. Action columns (key or dataIndex `action` or
  * `actions`) always stay visible.
  *
+ * The table also fits its container on wide screens: when the columns do not fit the width of the element the table is
+ * rendered into, the least important columns move into the expandable row one by one until the rest fit, down to the
+ * identifying (`mobile`) columns and the action column. `priority` ranks the columns (1 is the most important, kept the
+ * longest); columns without a priority rank after the prioritised ones, the rightmost of them dropping first. The width
+ * a column needs is its numeric `width`, else `minWidth`, else an estimate from its title ({@link estimateColumnWidth}).
+ *
  * `searchable` controls the free-text column search. Data columns are searchable by default in both modes; set it to
  * `false` for columns that the backend cannot search. Enum filters (`filters`) are independent of the flag.
  */
-export type VempainColumnType<RecordType> = ColumnType<RecordType> & { mobile?: boolean; searchable?: boolean };
-export type VempainColumnGroupType<RecordType> = ColumnGroupType<RecordType> & { mobile?: boolean; searchable?: boolean };
+export interface VempainColumnExtras {
+    mobile?: boolean;
+    searchable?: boolean;
+    /** Importance of the column when the table is too narrow for every column: 1 is dropped last. */
+    priority?: number;
+    /** Pixels the column needs when the table decides what fits; `width` wins when it is a number. */
+    minWidth?: number;
+}
+
+export type VempainColumnType<RecordType> = ColumnType<RecordType> & VempainColumnExtras;
+export type VempainColumnGroupType<RecordType> = ColumnGroupType<RecordType> & VempainColumnExtras;
 export type VempainColumnsType<RecordType> = (VempainColumnType<RecordType> | VempainColumnGroupType<RecordType>)[];
 
 /** Where the rows are filtered, sorted and paged: in the browser (`client`) or by the backend (`server`). */
@@ -109,6 +124,106 @@ export function splitColumnsForMobile<RecordType>(columns: VempainColumnsType<Re
     }
 
     return {visible, collapsed};
+}
+
+/** The default width estimate of a column without `width` and `minWidth`, in pixels. */
+export const DEFAULT_COLUMN_WIDTH = 120;
+/** The default width estimate of an action column without `width` and `minWidth`, in pixels: room for a few icon buttons. */
+export const DEFAULT_ACTION_COLUMN_WIDTH = 160;
+
+/**
+ * The pixels a column needs on screen: its numeric `width`, else `minWidth`, else an estimate from the length of its title
+ * (nine pixels a character plus the cell padding and the sorter), at least the default for its kind.
+ */
+export function estimateColumnWidth<RecordType>(column: VempainColumnType<RecordType> | VempainColumnGroupType<RecordType>): number {
+    if (typeof column.width === "number" && column.width > 0) {
+        return column.width;
+    }
+
+    if (typeof column.minWidth === "number" && column.minWidth > 0) {
+        return column.minWidth;
+    }
+
+    const fallback = isActionColumn(column) ? DEFAULT_ACTION_COLUMN_WIDTH : DEFAULT_COLUMN_WIDTH;
+    const title = typeof column.title === "string" ? column.title : "";
+    const sorterRoom = "sorter" in column && column.sorter ? 24 : 0;
+    return Math.max(fallback, title.length * 9 + 32 + sorterRoom);
+}
+
+/**
+ * Splits the columns into the ones that fit the container and the ones that move into the expandable row: the identifying
+ * (`mobile`, else the first data) columns and the action columns always stay; of the rest the least important column
+ * (highest `priority` number, then the rightmost column without a priority) is dropped until the estimated widths fit.
+ * An unknown container width (0, before the first measurement) keeps every column.
+ */
+export function fitColumnsToWidth<RecordType>(columns: VempainColumnsType<RecordType>, containerWidth: number): {
+    visible: VempainColumnsType<RecordType>;
+    collapsed: VempainColumnsType<RecordType>;
+} {
+    if (!(containerWidth > 0)) {
+        return {visible: [...columns], collapsed: []};
+    }
+
+    const {visible: essential} = splitColumnsForMobile(columns);
+    const optional = columns.filter((column) => !essential.includes(column));
+    // drop order: columns without a priority first (rightmost first), then by descending priority number
+    const dropOrder = optional
+            .map((column, index) => ({column, index}))
+            .sort((a, b) => {
+                const aPriority = a.column.priority ?? Number.POSITIVE_INFINITY;
+                const bPriority = b.column.priority ?? Number.POSITIVE_INFINITY;
+                if (aPriority !== bPriority) {
+                    return bPriority - aPriority;
+                }
+                return b.index - a.index;
+            })
+            .map((entry) => entry.column);
+
+    const dropped = new Set<VempainColumnType<RecordType> | VempainColumnGroupType<RecordType>>();
+    let total = columns.reduce((sum, column) => sum + estimateColumnWidth(column), 0);
+
+    for (const column of dropOrder) {
+        if (total <= containerWidth) {
+            break;
+        }
+        dropped.add(column);
+        total -= estimateColumnWidth(column);
+    }
+
+    // a table with dropped columns gets the expand column of the expandable row
+    return {
+        visible: columns.filter((column) => !dropped.has(column)),
+        collapsed: columns.filter((column) => dropped.has(column))
+    };
+}
+
+/** The width of the element in pixels, followed with a ResizeObserver when the browser has one; 0 until measured. */
+function useContainerWidth(elementRef: { current: HTMLElement | null }): number {
+    const [width, setWidth] = useState(0);
+
+    useEffect(() => {
+        const element = elementRef.current;
+        if (!element) {
+            return;
+        }
+        const measure = () => setWidth(Math.floor(element.getBoundingClientRect().width));
+        measure();
+
+        if (typeof ResizeObserver === "undefined") {
+            window.addEventListener("resize", measure);
+            return () => window.removeEventListener("resize", measure);
+        }
+
+        const observer = new ResizeObserver((entries) => {
+            const entry = entries[0];
+            const measured = entry?.contentRect?.width;
+            setWidth(Math.floor(typeof measured === "number" ? measured : element.getBoundingClientRect().width));
+        });
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, [elementRef]);
+
+    return width;
 }
 
 function readDataIndex<RecordType>(record: RecordType, dataIndex: unknown): unknown {
@@ -505,15 +620,18 @@ interface VempainTableViewProps<RecordType> extends Omit<VempainTableProps<Recor
 
 /**
  * The table itself. It owns the column filter state so that the header dropdowns and the search inside a collapsed
- * mobile row drive the same filters, and it adapts to narrow screens: below the collapse breakpoint only the columns
- * flagged as `mobile`, plus the action column, remain visible; every other column is listed inside the expandable row,
- * above any expanded content the caller provides.
+ * row drive the same filters, and it adapts to the space it has: below the collapse breakpoint only the columns flagged
+ * as `mobile`, plus the action column, remain visible; above it the columns that do not fit the container are dropped
+ * least important first ({@link fitColumnsToWidth}). Every dropped column is listed inside the expandable row, above any
+ * expanded content the caller provides.
  */
 function VempainTableView<RecordType extends object>(props: VempainTableViewProps<RecordType>) {
     const {columns = [], collapseBelow = "md", dataMode = "client", paged, reload, ref, expandable, size, loading, onChange, ...tableProps} = props;
     const {t} = useTranslation();
     const screens = Grid.useBreakpoint();
     const narrow = isNarrowScreen(screens, collapseBelow);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const containerWidth = useContainerWidth(wrapperRef);
     const serverMode = dataMode === "server" && paged !== undefined;
     const [filters, setFilters] = useState<VempainTableFilters>({});
     const [mobileSearch, setMobileSearch] = useState<string>();
@@ -561,14 +679,17 @@ function VempainTableView<RecordType extends object>(props: VempainTableViewProp
                 onChange: handleChange
             };
 
-    if (!narrow) {
-        return <Table<RecordType> {...tableProps} {...dataProps} columns={enhancedColumns as ColumnsType<RecordType>} expandable={expandable} size={size}/>;
-    }
-
-    const {visible, collapsed} = splitColumnsForMobile(enhancedColumns);
+    // Below the breakpoint only the identifying and action columns stay; above it the columns that do not fit the container
+    // move into the expandable row, least important first, so the table never grows wider than the element it is in
+    const {visible, collapsed} = narrow ? splitColumnsForMobile(enhancedColumns) : fitColumnsToWidth(enhancedColumns, containerWidth);
 
     if (collapsed.length === 0) {
-        return <Table<RecordType> {...tableProps} {...dataProps} columns={visible as ColumnsType<RecordType>} expandable={expandable} size={size ?? "small"}/>;
+        return (
+                <div className={"vempain-table"} ref={wrapperRef}>
+                    <Table<RecordType> {...tableProps} {...dataProps} columns={visible as ColumnsType<RecordType>} expandable={expandable}
+                                       size={narrow ? size ?? "small" : size}/>
+                </div>
+        );
     }
 
     // The table only filters the columns it renders, so the filters of the collapsed columns are applied here in
@@ -656,15 +777,23 @@ function VempainTableView<RecordType extends object>(props: VempainTableViewProp
         )
     };
 
+    // With columns dropped for the width, the remaining ones share the container (fixed layout, each at its estimate so
+    // that the browser scales them proportionally) instead of letting their content widen the table past it
+    const fittedColumns = narrow
+            ? visible
+            : visible.map((column) => (column.width === undefined ? {...column, width: estimateColumnWidth(column)} : column));
+
     return (
-            <Table<RecordType>
-                    {...tableProps}
-                    {...narrowDataProps}
-                    columns={visible as ColumnsType<RecordType>}
-                    expandable={mobileExpandable}
-                    size={size ?? "small"}
-                    tableLayout={tableProps.tableLayout ?? "auto"}
-            />
+            <div className={"vempain-table"} ref={wrapperRef}>
+                <Table<RecordType>
+                        {...tableProps}
+                        {...narrowDataProps}
+                        columns={fittedColumns as ColumnsType<RecordType>}
+                        expandable={mobileExpandable}
+                        size={narrow ? size ?? "small" : size}
+                        tableLayout={tableProps.tableLayout ?? (narrow ? "auto" : "fixed")}
+                />
+            </div>
     );
 }
 
