@@ -23,6 +23,7 @@ describe("management API clients", () => {
     beforeEach(() => {
         axiosInstance.put.mockReset();
         axiosInstance.get.mockReset();
+        axiosInstance.post.mockReset();
     });
 
     it("UserAPI.update puts to /{id} as the backend requires", async () => {
@@ -35,6 +36,18 @@ describe("management API clients", () => {
 
         expect(axiosInstance.put).toHaveBeenCalledWith("/7", user);
         expect(result).toEqual(user);
+    });
+
+    it("AclAPI.bulkUpdate posts the request to /bulk and returns the outcome", async () => {
+        const {AclAPI} = await import("../services/AclAPI");
+        const aclAPI = new AclAPI("http://backend/api", "/content-management/acls");
+        const request = {acl_ids: [41, 42], mode: "ADD" as const, entries: [{user: 7, unit: null, create_privilege: false, read_privilege: true, modify_privilege: false, delete_privilege: false}]};
+        axiosInstance.post.mockResolvedValue({data: {updated_acl_ids: [41], skipped_acl_ids: [42]}});
+
+        const result = await aclAPI.bulkUpdate(request);
+
+        expect(axiosInstance.post).toHaveBeenCalledWith("/bulk", request);
+        expect(result.skipped_acl_ids).toEqual([42]);
     });
 
     it("UnitAPI.update puts to /{id} with the member lists", async () => {

@@ -13,7 +13,7 @@
 | Path              | Purpose                                                                                                                                                   |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `src/main/`       | `Login`, `Logout`, `VempainTable`, `usePagedTable`                                                                                                        |
-| `src/management/` | `UserList`, `UserEditor`, `UnitList`, `UnitEditor`, `loadUsersAndUnits` — the user/unit management screens shared by the admin and file SPAs; `AclRowsEditor` (the ACL row editor every Vempain frontend uses) and `AclEditor` (its `AclVO` adapter) |
+| `src/management/` | `UserList`, `UserEditor`, `UnitList`, `UnitEditor`, `loadUsersAndUnits` — the user/unit management screens shared by the admin and file SPAs; `AclRowsEditor` (the ACL row editor every Vempain frontend uses), `AclEditor` (its `AclVO` adapter) and `AclBulkEditor`/`AclBulkUpdateButton` (the "Permissions of selected" dialog of the lists) |
 | `src/models/`     | `Requests/` (`LoginRequest`, `PagedRequest`), `Responses/` (`LoginResponse`, `PagedResponse`, `AclVO`, ...), `*Enum.ts` as `as const` objects             |
 | `src/services/`   | `AbstractAPI` (bearer-token Axios client with `findPageable`), `AuthAPI`, `UserAPI`, `UnitAPI`, `AclAPI`, `AuthInterceptor` (401/403 handling)            |
 | `src/session/`    | `SessionProvider`, `AuthVerify`, `sessionExpiration`                                                                                                      |
@@ -49,7 +49,9 @@
   do not fit into the expandable row, least important first (`fitColumnsToWidth`: columns without `priority` from the right, then
   descending `priority`; the identifying and action columns are never dropped), switching to a fixed layout with every remaining column
   at its estimated width (`estimateColumnWidth`: numeric `width`, else `minWidth`, else from the title). Screens rank their columns with
-  `priority` (1 = kept longest) and give action columns a `width`. An unmeasured container (0, jsdom) shows every column. Tests:
+  `priority` (1 = kept longest) and give action columns a `width`. An unmeasured container (0, jsdom) shows every column. A caller's
+  `scroll.x` is dropped (only `scroll.y` is passed on): a horizontally scrolling table is sized by its content (`max-content`) and grew
+  past the viewport in every screen that passed it, so the SPAs never set it and let the fit drop columns instead. Tests:
   `src/__tests__/main.VempainTable.fit.test.tsx`.
 
 ## User and unit management
@@ -80,6 +82,15 @@
   content editors of the admin SPA (page, form, layout, component, gallery through `AclEdit`) mount it; the file SPA's publish dialogs
   mount `AclRowsEditor` directly with `user_id`/`unit_id` rows. `ACL_PRIVILEGES`/`AclPrivilege` are kept as aliases of
   `ACL_ROW_PRIVILEGES`/`AclRowPrivilege`.
+- `AclBulkEditor` (`src/management/AclBulkEditor.tsx`) is the shared dialog behind the "Permissions of selected" button of the SPAs'
+  lists with selectable ACL-bearing rows, and `AclBulkUpdateButton` the button that opens it (disabled without a selection, closes it
+  after `onUpdated`). It takes the selected `aclIds` and the host's `aclAPI`/`userAPI`/`unitAPI`, lets the user choose whether the
+  existing rows are kept (`ADD`, a grantee already on an ACL gets the new privileges) or replaced (`REPLACE`), edits the entries with
+  `AclRowsEditor` (`uniqueGrantees`, `AclVO` rows, `toBulkEntries` strips the ids) and sends them through `AclAPI.bulkUpdate`
+  (`POST /content-management/acls/bulk`, models `AclBulkUpdateRequest`/`AclBulkEntry`/`AclBulkUpdateModeEnum`/`AclBulkUpdateResponse`).
+  The backend changes only the ACLs granting the caller modify and reports the rest in `skipped_acl_ids`; the host shows the outcome and
+  reloads its list. Texts use the `AclBulk.*` keys with English defaults in `ACL_BULK_TRANSLATION_DEFAULTS` (the selection count is
+  appended in parentheses, no interpolation needed). Tested in `management.AclBulkEditor.test.tsx` and `services-management.test.ts`.
 - `UserEditor`/`UnitEditor` take `userId`/`unitId` (0 = create), `currentUserId` (a new entity starts with an ACL row granting that user
   everything), `onSaved`, optional `onCancel` and `renderMetadata` (the admin SPA plugs its `MetadataForm` in). Tests:
   `management.AclRowsEditor.test.tsx` (the row rules), `management.AclEditor.test.tsx` (the `AclVO` adapter), `management.UnitEditor.test.tsx`,

@@ -152,6 +152,19 @@ describe("VempainTable fitting its container", () => {
         expect(headerTitles()).toEqual(["ID", "Name", "Description", "Created", "Modified", "Action"]);
     });
 
+    it("drops a caller's horizontal scroll setting and keeps the vertical one", () => {
+        const {container, unmount} = render(<VempainTable dataSource={rows} columns={columns()} rowKey="id" scroll={{x: "max-content", y: 240}}/>);
+        const body = container.querySelector(".ant-table-body") as HTMLElement | null;
+        expect(body).not.toBeNull();
+        expect(body?.style.maxHeight).toBe("240px");
+        expect(container.querySelector(".ant-table-content")).toBeNull();
+        unmount();
+
+        render(<VempainTable dataSource={rows} columns={columns()} rowKey="id" scroll={{x: "max-content"}}/>);
+        const content = document.querySelector(".ant-table-content") as HTMLElement | null;
+        expect(content?.querySelector("table")?.style.width ?? "").toBe("");
+    });
+
     it("keeps only the identifying and action columns in the narrowest container", () => {
         render(<VempainTable<Row> columns={columns()} dataSource={rows} rowKey="id" pagination={false}/>);
         announceWidth(150);

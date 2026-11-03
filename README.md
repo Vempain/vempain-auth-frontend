@@ -13,6 +13,8 @@ and logout components, session context, session-expiration checks, and Axios-bas
 - `AbstractAPI` helpers for authenticated CRUD requests and pageable queries
 - `UserList`, `UserEditor`, `UnitList` and `UnitEditor` management screens, and the ACL row editor `AclRowsEditor` (with `AclEditor`
   for rows in the `AclVO` shape) that every Vempain frontend mounts on its own forms
+- `AclBulkEditor` and `AclBulkUpdateButton`: the "Permissions of selected" dialog of the lists, granting the same ACL rows to every
+  selected resource at once (`AclAPI.bulkUpdate`, keep-and-add or replace)
 - TypeScript models for authentication, paging, sorting, ACL, and API responses
 
 ## Requirements

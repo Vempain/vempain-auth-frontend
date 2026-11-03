@@ -1,4 +1,5 @@
 export type {AbstractResponse} from './AbstractResponse';
+export type {AclBulkUpdateResponse} from './AclBulkUpdateResponse';
 export type {AclVO} from './AclVO';
 export type {ActionVO} from './ActionVO';
 export type {LoginResponse} from './LoginResponse.ts';
