@@ -11,3 +11,5 @@ export type {UnitListProps} from './UnitList';
 export {UnitEditor} from './UnitEditor';
 export type {UnitEditorProps} from './UnitEditor';
 export {loadUsersAndUnits, fullAclFor, completeAcls, MANAGEMENT_LOOKUP_PAGE_SIZE} from './managementTools';
+export {AclBulkEditor, AclBulkUpdateButton, ACL_BULK_TRANSLATION_DEFAULTS, toBulkEntries} from './AclBulkEditor';
+export type {AclBulkEditorProps, AclBulkUpdateButtonProps} from './AclBulkEditor';

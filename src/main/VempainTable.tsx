@@ -626,7 +626,10 @@ interface VempainTableViewProps<RecordType> extends Omit<VempainTableProps<Recor
  * expanded content the caller provides.
  */
 function VempainTableView<RecordType extends object>(props: VempainTableViewProps<RecordType>) {
-    const {columns = [], collapseBelow = "md", dataMode = "client", paged, reload, ref, expandable, size, loading, onChange, ...tableProps} = props;
+    const {columns = [], collapseBelow = "md", dataMode = "client", paged, reload, ref, expandable, size, loading, onChange, scroll, ...rest} = props;
+    // A horizontal scroll setting (`scroll.x`, for example `max-content`) would size the table by its content and let it grow past its
+    // container and the viewport, defeating the fit; only the vertical part of a caller's `scroll` is kept
+    const tableProps = scroll?.y === undefined ? rest : {...rest, scroll: {y: scroll.y}};
     const {t} = useTranslation();
     const screens = Grid.useBreakpoint();
     const narrow = isNarrowScreen(screens, collapseBelow);
